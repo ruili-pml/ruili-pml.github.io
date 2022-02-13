@@ -23,13 +23,6 @@ Chuan Chen, **Rui Li**, Lin Shu, Zhiyu He, Jining Wang, Chengming Zhang, Huanfei
 Liquid based Neutrino Experiment](https://iopscience.iop.org/article/10.1088/1742-6596/1085/4/042037). _18th Workshop on Advanced Computing and Analysis Techniques
 in Physics Research (2018)_.
 
-## MSc Thesis
-
-[Learning Input-conditional Invariances
-via the Marginal Likelihood](https://github.com/ruili-pml/ruili-pml.github.io/blob/main/MSc%20Project.pdf)
-
-Supervisors: Marc Peter Deisenroth, So Takao, Mark van der Wilk.
-
 ## Contact
 **Email**:   
 [firstname.1.lastname@aalto.fi](mailto:rui.1.li@aalto.fi)
