@@ -25,5 +25,5 @@ in Physics Research (2018)_.
 
 ## Contact
 **Email**:   
-[firstname.1.lastname@aalto.fi](mailto:rui.1.li@aalto.fi)
+[firstname.lastname@aalto.fi](mailto:rui.li@aalto.fi)
 
