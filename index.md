@@ -13,6 +13,10 @@ I'm generally interested in probabilistic machine learning, in particular Gaussi
 
 ## Publications
 
+### Conference
+
+Arno Solin, **Rui Li**, Andrea Pilzer. A Look at Improving Robustness in Visual-inertial SLAM by Moment Matching. _Proceedings of the International Conference on Information Fusion (2022)_.
+
 ### Journals
 Chuan Chen, **Rui Li**, Lin Shu, Zhiyu He, Jining Wang, Chengming Zhang, Huanfei Ma, Kazuyuki Aihara, Luonan Chen. [Predicting future dynamics from short-term time series using an Anticipated Learning Machine](https://academic.oup.com/nsr/article/7/6/1079/5740743). _National Science Review (2020)_.
 
