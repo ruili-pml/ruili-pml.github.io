@@ -15,7 +15,11 @@ I'm interested in meta learning, Gaussian process and Bayesian deep learning.
 
 ### Conference
 
-Arno Solin, **Rui Li**, Andrea Pilzer. "[A Look at Improving Robustness in Visual-inertial SLAM by Moment Matching](https://arxiv.org/abs/2205.13821)". _Proceedings of the International Conference on Information Fusion (2022)_.
+
+**Rui Li**, ST John, Arno Solin. "[Improving Hyperparameter Learning under Approximate Inference in Gaussian Process Models](.)".  _ICML (2023)_.
+
+
+Arno Solin, **Rui Li**, Andrea Pilzer. "[A Look at Improving Robustness in Visual-inertial SLAM by Moment Matching](https://arxiv.org/abs/2205.13821)". _FUSION (2022)_.
 
 ### Workshops
 
