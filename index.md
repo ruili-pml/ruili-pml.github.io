@@ -15,7 +15,7 @@ I'm interested in probabilistic machine learning, few-shot learning, and Bayesia
 
 ### Conference
 
-**Rui Li**, Martin Trapp, Marcus Klasson, Arno Solin. "Flatness Improves Backbone Generalisation in Few‐shot Classification." _Under Review at ICML_
+**Rui Li**, Martin Trapp, Marcus Klasson, Arno Solin. "[Flatness Improves Backbone Generalisation in Few‐shot Classification](https://arxiv.org/abs/2404.07696)." _Under Review_
 
 **Rui Li**, ST John, Arno Solin. "[Improving Hyperparameter Learning under Approximate Inference in Gaussian Process Models](https://arxiv.org/abs/2306.04201)".  _ICML (2023)_.
 
