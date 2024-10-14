@@ -8,7 +8,8 @@ Hi, welcome.
 
 I am a final year Ph.D. student at Aalto University supervised by [Prof Arno Solin](https://users.aalto.fi/~asolin/). I specialize in probabilistic machine learning, uncertainty quantification, and few-shot learning. I have obtained an M.Sc. in Machine Learning with Distinction at UCL. My work has led to ten publications including top venues like ICML, WACV, and NeurIPS workshops. I am proficient in Python and PyTorch. I co-organized workshops on Uncertainty Quantification for Computer Vision at top conferences ICCV and ECCV.
 
-CV: 
+[CV](https://github.com/ruili-pml/ruili-pml.github.io/blob/main/CV_Rui_Li.pdf)
+
 
 ## Publications
 
