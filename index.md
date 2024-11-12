@@ -17,6 +17,8 @@ I am a final year Ph.D. student at Aalto University supervised by [Prof Arno Sol
 
 **Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Bayesian Deep Learning]()" _Under Review_
 
+Anton Baumann, **Rui Li**, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp. "[Probabilistic Active Few-Shot Learning in Vision-Language Models]()" _Under Review_
+
 **Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Posterior Inferred, Now What? Streamlining Bayesian Deep Learning]()" _NeurIPS Workshop on Bayesian Decision-making and Uncertainty (2024)_
 
 Anton Baumann, Marcus Klasson, **Rui Li**, Arno Solin, Martin Trapp. "[Probabilistic Active Few-Shot Learning in Vision-Language Models]()" _NeurIPS Workshop on Bayesian Decision-making and Uncertainty (2024)_
