@@ -8,4 +8,5 @@ theme: jekyll-theme-minimal
 header_pages:
   - index.md
   - cv.html
+  - general_cv.html
 
