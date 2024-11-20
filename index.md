@@ -17,7 +17,7 @@ I am a final year Ph.D. student at Aalto University supervised by [Prof Arno Sol
 
 ### Conference
 
-**Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Prediction Bayesian Deep Learning]()" _Under Review_
+**Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Prediction in Bayesian Deep Learning]()" _Under Review_
 
 Anton Baumann, **Rui Li**, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp. "[Post-hoc Probabilistic Vision-Language Models. ]()" _Under Review_
 
