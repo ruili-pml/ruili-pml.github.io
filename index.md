@@ -17,9 +17,9 @@ I am a final year Ph.D. student at Aalto University supervised by [Prof Arno Sol
 
 ### Conference
 
-**Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Bayesian Deep Learning]()" _Under Review_
+**Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Prediction Bayesian Deep Learning]()" _Under Review_
 
-Anton Baumann, **Rui Li**, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp. "[Probabilistic Active Few-Shot Learning in Vision-Language Models]()" _Under Review_
+Anton Baumann, **Rui Li**, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp. "[Post-hoc Probabilistic Vision-Language Models. ]()" _Under Review_
 
 **Rui Li**, Martin Trapp, Marcus Klasson, Arno Solin. "[Flatness Improves Backbone Generalisation in Few‐shot Classification](https://arxiv.org/abs/2404.07696)." _WACV (2025)_
 
@@ -37,8 +37,7 @@ Marlon Tobaben, Marcus Klasson, **Rui Li**, Arno Solin, Antti Honkela. "[Differe
 
 **Rui Li**, ST John, Arno Solin. "[Towards Improved Learning in Gaussian Processes: The Best of Two Worlds](https://arxiv.org/pdf/2211.06260.pdf)".  _NeurIPS Workshop on Gaussian Processes, Spatiotemporal Modeling, and Decision-making Systems (2022)_.
 
-**Rui Li**, Zhengyun You, Yumei Zhang. "[Deep Learning for Signal and Background Discrimination in
-Liquid based Neutrino Experiment](https://iopscience.iop.org/article/10.1088/1742-6596/1085/4/042037)". _18th Workshop on Advanced Computing and Analysis Techniques
+**Rui Li**, Zhengyun You, Yumei Zhang. "[Deep Learning for Signal and Background Discrimination in Liquid based Neutrino Experiment](https://iopscience.iop.org/article/10.1088/1742-6596/1085/4/042037)". _18th Workshop on Advanced Computing and Analysis Techniques
 in Physics Research (2018)_.
 
 
