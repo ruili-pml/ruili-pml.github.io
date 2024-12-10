@@ -6,20 +6,18 @@ layout: default
 
 Hi, welcome.
 
-I am a final year Ph.D. student at Aalto University supervised by [Prof Arno Solin](https://users.aalto.fi/~asolin/). I specialize in probabilistic machine learning, uncertainty quantification, and few-shot learning. I have obtained an M.Sc. in Machine Learning with Distinction at UCL. My work has led to ten publications including top venues like ICML, WACV, and NeurIPS workshops. I am proficient in Python and PyTorch. I co-organized workshops on Uncertainty Quantification for Computer Vision at top conferences ICCV and ECCV.
+I am a final year Ph.D. student at Aalto University supervised by [Prof Arno Solin](https://users.aalto.fi/~asolin/). I specialize in uncertainty quantification, Bayesian methods, and few-shot learning. My work has been published on top venues like ICML, WACV, and NeurIPS workshops.
 
+[View My CV](cv/)
 
-[View My CV (Academic Version)](cv/)
-
-[View My CV (General Version)](general_cv/)
 
 ## Publications
 
 ### Conference
 
-**Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Prediction in Bayesian Deep Learning]()" _Under Review_
+**Rui Li**, Marcus Klasson, Arno Solin, Martin Trapp. "[Streamlining Prediction in Bayesian Deep Learning](https://arxiv.org/abs/2411.18425)" _Under Review_
 
-Anton Baumann, **Rui Li**, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp. "[Post-hoc Probabilistic Vision-Language Models. ]()" _Under Review_
+Anton Baumann, **Rui Li**, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp. "[Post-hoc Probabilistic Vision-Language Models. ](https://arxiv.org/abs/2412.06014)" _Under Review_
 
 **Rui Li**, Martin Trapp, Marcus Klasson, Arno Solin. "[Flatness Improves Backbone Generalisation in Few‐shot Classification](https://arxiv.org/abs/2404.07696)." _WACV (2025)_
 
