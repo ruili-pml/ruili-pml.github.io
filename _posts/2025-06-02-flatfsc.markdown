@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Flatness Improves Backbone Generalisation in Few-shot Classification"
-date:   2025-04-22 22:21:59 +00:00
+date:   2025-01-22 22:21:59 +00:00
 image:  /images/flatfsc.png
 categories: research
 author: "Rui Li"
