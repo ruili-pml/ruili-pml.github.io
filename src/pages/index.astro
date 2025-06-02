@@ -16,8 +16,9 @@ import { getAllPosts, sortMDByDate } from "@/utils";
 
 const interests = [
   "Probabilistic Machine Learning",
-  "Bayesian Deep Learning",
-  "Few-shot Learning",
+  "Decision-Making",
+  "AI4Science",
+  "Riemannian Geometry",
 ];
 
 const MAX_NEWS = 10;
@@ -47,9 +48,9 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
 
         <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
           <Label
-            title='Aalto University'
+            title='Vector Institute'
             as='a'
-            href='https://users.aalto.fi/~asolin/group/'
+            href='https://vectorinstitute.ai/team/agustinus-kristiadi/'
           >
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -62,7 +63,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
               ></path></svg
             >
           </Label>
-          <Label title='rui.li[at]aalto.fi'>
+          <Label title='agustinus[at]kristia.de'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 18 18'
@@ -83,7 +84,7 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
           <Label
             title='Google Scholar'
             as='a'
-            href='https://scholar.google.com/citations?user=2HW6eeUAAAAJ'
+            href='https://scholar.google.com/citations?user=_1qe2mYAAAAJ'
             target='_blank'
           >
             <svg
@@ -99,11 +100,47 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
             </svg>
           </Label>
 
+          <Label
+            title='@agustinus.kristia.de'
+            as='a'
+            href='https://bsky.app/profile/agustinus.kristia.de'
+            target='_blank'
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 32 32'
+              class='h-5 w-5'
+              slot='icon'
+            >
+              <path
+                fill='currentColor'
+                d='M23.931,5.298c-3.21,2.418-6.663,7.32-7.931,9.951-1.267-2.631-4.721-7.533-7.931-9.951-2.316-1.744-6.069-3.094-6.069,1.201,0,.857,.49,7.206,.778,8.237,.999,3.583,4.641,4.497,7.881,3.944-5.663,.967-7.103,4.169-3.992,7.372,5.908,6.083,8.492-1.526,9.154-3.476,.123-.36,.179-.527,.179-.379,0-.148,.057,.019,.179,.379,.662,1.949,3.245,9.558,9.154,3.476,3.111-3.203,1.671-6.405-3.992-7.372,3.24,.553,6.882-.361,7.881-3.944,.288-1.031,.778-7.38,.778-8.237,0-4.295-3.753-2.945-6.069-1.201Z'
+              ></path>
+            </svg>
+          </Label>
 
           <Label
-            title='ruili-pml'
+            title='@akristiadi7'
             as='a'
-            href='https://github.com/ruili-pml'
+            href='https://x.com/akristiadi7'
+            target='_blank'
+          >
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='-3 -1 18 18'
+              class='h-5 w-5'
+              slot='icon'
+            >
+              <path
+                fill='currentColor'
+                d='M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z'
+              ></path>
+            </svg>
+          </Label>
+          <Label
+            title='wiseodd'
+            as='a'
+            href='https://github.com/wiseodd'
             target='_blank'
           >
             <svg
@@ -124,8 +161,15 @@ const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
 
     <Section title='About'>
       <p>
-        I am a Ph.D. student at Aalto University supervised by Prof Arno Solin. My research interests are uncertainty quantification, Bayesian methods, and few-shot learning. My work has been published on top venues like ICML, ICLR, WACV, and NeurIPS workshops.
-
+        Agustinus Kristiadi is a postdoctoral fellow at the Vector Institute in Toronto,
+        and previously obtained his PhD from the University of Tuebingen in Germany. His
+        research interests are in probabilistic methods for large-scale neural networks,
+        decision-making under uncertainty, and their applications in broader scientific
+        fields such as chemistry. His work has been recognized in the form of best PhD
+        thesis award and multiple spotlight papers from flagship machine learning
+        conferences. His contributions to the scientific society include mentoring
+        underrepresented students and actively contributing to the open-source
+        community.
       </p>
     </Section>
 
