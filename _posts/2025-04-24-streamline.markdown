@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "Streamlining Prediction in Bayesian Deep Learning"
+date:   2025-04-24 22:21:59 +00:00
+image: /images/suq.png
+categories: Selected Publications
+author: "Rui Li"
+authors: "<strong>Rui Li</strong>, xxxx"
+venue: "ICLR 2025"
+arxiv: https://arxiv.org/abs/2411.18425
+code: https://github.com/AaltoML/SUQ
+---
+While estimating posterior has been actively researched in Bayesian deep learning (BDL), how to make predictions with posterior efficiently is largely overlooked. We examine streamlining prediction in BDL through a single forward pass without sampling. We showcase our approach for both MLP and transformers, such as ViT and GPT-2.
