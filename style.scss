@@ -29,20 +29,20 @@ th,
 tr,
 p,
 a {
-  font-family: 'Inter', Verdana, Helvetica, sans-serif;
+  font-family: 'Inter', Lato, Helvetica, sans-serif;
   font-size: 18px;
   line-height: 1.6;
   font-display: auto;
 }
 
 strong {
-  font-family: 'Inter', Verdana, Helvetica, sans-serif;
+  font-family: 'Inter', Lato, Helvetica, sans-serif;
   font-size: 18px;
   font-display: auto;
 }
 
 h2 {
-  font-family: 'Inter', Verdana, Helvetica, sans-serif;
+  font-family: 'Inter', Lato, Helvetica, sans-serif;
   font-size: 28px;
   font-display: auto;
   font-weight: normal;
@@ -53,7 +53,7 @@ h2 {
 }
 
 h3 {
-  font-family: 'Inter', Verdana, Helvetica, sans-serif;
+  font-family: 'Inter', Lato, Helvetica, sans-serif;
   font-size: 20px;
   font-weight: 700;
   font-display: auto;
@@ -62,15 +62,9 @@ h3 {
   display:block; 
 }
 
-pub-description {
-  font-size: 16px;
-  line-height: 1.5;
-  color: #726f6f;  // optional: to reduce contrast and de-emphasize
-  margin-top: 8px;
-}
 
 h1 {
-  font-family: 'Inter', Verdana, Helvetica, sans-serif;
+  font-family: 'Inter', Lato, Helvetica, sans-serif;
   font-size: 28px;
   font-weight: normal;
   font-display: auto;
@@ -81,6 +75,13 @@ h1 {
   margin-left: 0px;
   margin-right: 0px;
 
+}
+
+.pub-description {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #726f6f;  // optional: to reduce contrast and de-emphasize
+  margin-top: 8px;
 }
 
 .one {
