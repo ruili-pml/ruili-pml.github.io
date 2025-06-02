@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Post-hoc Probabilistic Vision-Language Models"
+title:  "Improving Hyperparameter Learning under Approximate Inference in Gaussian Process Models"
 date:   2023-04-24 22:21:59 +00:00
 image: /images/gp.png
 categories: research
