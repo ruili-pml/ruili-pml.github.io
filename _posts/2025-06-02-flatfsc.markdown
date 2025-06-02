@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "Flatness Improves Backbone Generalisation in Few-shot Classification"
+date:   2025
+image: /images/flatfsc.png
+categories: research
+author: "Rui Li"
+authors: "<strong>Rui Li</strong>, Martin Trapp, Marcus Klasson, Arno Solin"
+venue: "WACV (Oral)"
+paper: https://arxiv.org/abs/2404.07696
+code: https://github.com/AaltoML/FlatFSL
+---
+In few-shot classification most efforts focus on adapting the backbone to the target domain without considering the importance of backbone training. We show flatness-aware backbone training can lead to better generalisation through theoretical and empirical results.

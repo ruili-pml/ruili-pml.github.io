@@ -1,0 +1,13 @@
+---
+layout: post
+title:  "Post-hoc Probabilistic Vision-Language Models"
+date:   2025
+image: /images/bayesvlm.png
+categories: research
+author: "Rui Li"
+authors: "Anton Baumann, <strong>Rui Li</strong>, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp"
+venue: "Under Review"
+paper: https://arxiv.org/abs/2411.18425
+code: https://github.com/AaltoML/BayesVLM
+---
+While Vision-Language models have shown remarkable performance in various tasks, the lack of uncertainty estimation makes them unreliable in high-stakes applications. We propose a post-hoc uncertainty quantification method based on Laplace approximation, which provides useful predictive uncertainties and better calibration.
