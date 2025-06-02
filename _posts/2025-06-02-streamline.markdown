@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Streamlining Prediction in Bayesian Deep Learning"
-date:   2025
+date:   2025-04-24 22:21:59 +00:00
 image: /images/suq.png
 categories: research
 author: "Rui Li"
