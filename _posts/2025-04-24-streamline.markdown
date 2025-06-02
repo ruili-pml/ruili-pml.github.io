@@ -5,8 +5,8 @@ date:   2025-04-24 22:21:59 +00:00
 image: /images/suq.png
 categories: research
 author: "Rui Li"
-authors: "<strong>Rui Li</strong>, xxxx"
-venue: "ICLR 2025"
+authors: "<strong>Rui Li</strong>, Marcus Klasson, Arno Solin, Martin Trapp"
+venue: "ICLR"
 arxiv: https://arxiv.org/abs/2411.18425
 code: https://github.com/AaltoML/SUQ
 ---
