@@ -1,12 +1,11 @@
 ---
 layout: post
-title: "Post-hoc Probabilistic Vision-Language Models"
+title: "Post-hoc Probabilistic Vision-Language Models, Under Review"
 date:   2025-02-28 22:21:59 +00:00
 image: /images/bayesvlm.png
 categories: research
 author: "Rui Li"
 authors: "Anton Baumann, <strong>Rui Li</strong>, Marcus Klasson, Santeri Mentu, Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp"
-venue: "Under Review"
 paper: https://arxiv.org/abs/2411.18425
 code: https://github.com/AaltoML/BayesVLM
 ---

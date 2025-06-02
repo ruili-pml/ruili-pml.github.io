@@ -1,12 +1,11 @@
 ---
 layout: post
-title: "Flatness Improves Backbone Generalisation in Few-shot Classification"
+title: "Flatness Improves Backbone Generalisation in Few-shot Classification, WACV 2025 (Oral)"
 date:   2025-01-22 22:21:59 +00:00
 image:  /images/flatfsc.png
 categories: research
 author: "Rui Li"
 authors: "<strong>Rui Li</strong>, Martin Trapp, Marcus Klasson, Arno Solin"
-venue: "WACV (Oral)"
 paper: https://arxiv.org/abs/2404.07696
 code: https://github.com/AaltoML/FlatFSL
 ---

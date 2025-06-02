@@ -1,12 +1,11 @@
 ---
 layout: post
-title: "Improving Hyperparameter Learning under Approximate Inference in Gaussian Process Models"
+title: "Improving Hyperparameter Learning under Approximate Inference in Gaussian Process Models, ICML 2023"
 date: 2023-04-24 22:21:59 +00:00
 image: /images/gp.png
 categories: research
 author: "Rui Li"
 authors: "<strong>Rui Li</strong>, Ti John, Arno Solin"
-venue: "ICML"
 paper: https://arxiv.org/abs/2306.04201
 code: https://github.com/AaltoML/improved-hyperparameter-learning
 ---
