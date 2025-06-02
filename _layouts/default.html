@@ -88,8 +88,9 @@
               {% if post.code %}
               <a href="{{post.code}}">code</a>
               {% endif %}
-              <p></p>
-              {{ post.excerpt }}
+              <div class="paper-description">
+                {{ post.excerpt }}
+              </div>
             </td>
           </tr>
           {% endif %}
