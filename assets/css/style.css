@@ -1,0 +1,407 @@
+/* ===== Global Reset & Base ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  color: #222;
+  background-color: #f5f5f7;
+}
+
+:root {
+  --page-max-width: 1140px;
+  --page-padding-x: 1.5rem;
+  --page-padding-y: 2rem;
+  --page-padding-bottom: 3rem;
+}
+
+
+/* Global link styling */
+a {
+  color: #0070f3;
+  text-decoration: none;      /* remove underline */
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: #0056c7;             /* darker hover color */
+  text-decoration: none;      /* keep underline removed */
+}
+
+
+/* ===== Top Header ===== */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+  background: rgba(245, 245, 247, 0.95);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.site-header-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.site-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.site-nav-links a {
+  text-decoration: none;
+  color: #444;
+}
+
+.site-nav-links a:hover {
+  color: #0070f3;
+}
+
+/* social icon row in header */
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.icon-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #f0f0f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #555;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, transform 0.1s ease, color 0.15s ease;
+}
+
+.icon-button:hover {
+  background: #0070f3;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .site-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+
+/* ===== Layout ===== */
+.page-wrapper {
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--page-padding-y) var(--page-padding-x) var(--page-padding-bottom);
+}
+
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* ===== Sections ===== */
+.section {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  padding: 1.8rem 1.8rem 1.6rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+}
+
+.section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.4rem;
+}
+
+.section p + p {
+  margin-top: 0.6rem;
+}
+
+/* ===== About ===== */
+.about-heading {
+  font-size: 1.4rem;
+  margin-bottom: 0.4rem;
+}
+
+/* ===== News list ===== */
+.news-list {
+  list-style: none;
+}
+
+.news-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0.75rem;
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+.news-date {
+  color: #888;
+}
+
+/* ===== Publications ===== */
+.pub-list {
+  list-style: none;
+}
+
+.pub-item {
+  display: grid;
+  grid-template-columns: 220px 1fr;  /* fixed image column width */
+  gap: 1.8rem;
+  padding: 1.8rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+
+/* Publication thumbnails: natural aspect ratio, slightly bigger */
+/* Thumbnail container: fixed width column, flexible height */
+.pub-thumb {
+  width: 220px;           /* match grid column */
+  border-radius: 0.75rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Default image: fill container width, keep aspect ratio */
+.pub-thumb img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  margin: 0 auto;         /* center if narrower than container */
+}
+
+
+/* SUQ logo can still be centered nicely if needed */
+.pub-thumb img[src*="suq"] {
+  background: #ffffff;
+  padding: 6px;
+}
+
+/* BayesVLM: tall diagram → smaller width */
+.pub-thumb img[src*="bayesvlm"] {
+  max-width: 160px;
+  height: auto;
+  border-radius: 0.75rem;
+}
+
+
+.pub-item > div {
+  align-self: start;
+}
+
+.pub-meta-title {
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.pub-authors {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.pub-venue {
+  font-size: 0.95rem;
+  color: #777;
+  margin-bottom: 0.35rem;
+}
+
+.pub-links a {
+  font-size: 0.9rem;
+  color: #0070f3;
+  text-decoration: none;
+  margin-right: 0.6rem;
+}
+
+.pub-links a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Blog preview on home page ===== */
+.blog-preview-list {
+  list-style: none;
+}
+
+.blog-preview-item {
+  padding: 0.5rem 0;
+}
+
+.blog-preview-item a {
+  text-decoration: none;
+  color: #222;
+}
+
+.blog-preview-item a:hover {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.blog-preview-meta {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+/* ===== Blog pages ===== */
+.blog-main {
+  max-width: var(--page-max-width);
+}
+
+.blog-post-title {
+  font-size: 2.0rem;
+  font-weight: 600;
+  color: #000000;     /* title color */
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.blog-post-title:hover {
+  color: #0056c7;     /* slightly darker on hover */
+}
+
+.blog-list-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0070f3;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.blog-list-title:hover {
+  color: #0056c7;
+}
+
+
+.blog-post-meta {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 1.3rem;
+}
+
+.post-content {
+  font-size: 0.98rem;
+}
+
+.post-content p {
+  margin: 0.6rem 0;
+}
+
+.post-content h1,
+.post-content h2,
+.post-content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.post-content ul,
+.post-content ol {
+  margin: 0.6rem 0 0.6rem 1.3rem;
+}
+
+/* === Clean light code blocks === */
+pre {
+  background: #f6f8fa;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+pre code {
+  background: none !important;
+  color: #24292e;
+  font-size: 0.9rem;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  line-height: 1.5;
+}
+
+code {
+  background: #f3f4f6;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: 0.5rem;
+}
+
+/* ===== About hero (photo on the side) ===== */
+.about-hero h2 {
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.4rem;
+}
+
+.about-hero-inner {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.about-photo {
+  flex-shrink: 0;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+}
+
+.about-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.about-copy p {
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+}
+
+/* Stack vertically on small screens */
+@media (max-width: 720px) {
+  .about-hero-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .about-photo {
+    margin-bottom: 0.5rem;
+  }
+}
+

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rui Li – Academic Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+</head>
+<body>
+
+  <!-- Top navigation -->
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-title">Rui Li</div>
+
+      <div class="site-nav">
+        <div class="site-nav-links">
+          <a href="#about">About</a>
+          <a href="blog/index.html" style="margin-left:1.2rem;">Notes / Blog</a>
+          <a href="pdfs/CV.pdf" target="_blank" style="margin-left:1.2rem;">CV</a>
+        </div>
+        <div class="header-icons">
+          <a class="icon-button"
+             href="mailto:rui.li@aalto.fi"
+             aria-label="Email">
+            <i class="fa-solid fa-envelope"></i>
+          </a>
+          <a class="icon-button"
+             href="https://scholar.google.com/citations?user=2HW6eeUAAAAJ"
+             target="_blank"
+             aria-label="Google Scholar">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </a>
+          <a class="icon-button"
+             href="https://github.com/ruili-pml"
+             target="_blank"
+             aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a class="icon-button"
+             href="https://www.linkedin.com/in/ruili-pml/"
+             target="_blank"
+             aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-wrapper">
+    <div class="main">
+
+      <!-- About -->
+      <section id="about" class="section about-hero">
+        <h2>About Me</h2>
+      
+        <div class="about-hero-inner">
+          <div class="about-photo">
+            <img src="assets/img/avatar.jpg" alt="Rui Li">
+          </div>
+      
+          <div class="about-copy">
+            <p>
+              Hi, welcome. I am Rui Li, a PhD student at
+              Aalto University, working with
+              <a href="https://users.aalto.fi/~asolin/" target="_blank">Arno Solin</a> and <a href="https://trappmartin.github.io/" target="_blank">Martin Trapp</a>.
+            </p>
+      
+            <p>
+              My research mainly focuses on uncertainty quantification and probabilistic machine learning. 
+              I'm particually interested in efficient uncertainty quantification for large scale models.
+            </p>
+      
+            <p>
+              Before my PhD, I obtained my Master degree in Machine Learning from University College London and Bachelor degree in Physics from Sun Yat-sen University.
+            </p>
+
+            <p>
+              See my CV <a href="pdfs/CV.pdf" target="_blank">here</a>.
+            </p>
+
+            <p>
+              Email: rui.li[at]aalto.fi
+            </p>  
+          </div>
+        </div>
+      </section>
+      
+      
+      
+      
+
+      <!-- News -->
+      <section id="news" class="section">
+        <h2>News</h2>
+        <ul class="news-list">
+          <li class="news-item">
+            <div class="news-date">Oct 2025</div>
+            <div>
+              Started research internship at AWS,
+              working on KV cache compression for long context LLM with
+              <a href="https://mseeger.github.io/" target="_blank">Matthias Seeger</a>.
+            </div>
+          </li>
+          <li class="news-item">
+            <div class="news-date">Apr 2025</div>
+            <div>
+              Released the <a href="https://github.com/AaltoML/SUQ">SUQ library</a> for streamlined uncertainty quantification.
+            </div>
+          </li>
+          <li class="news-item">
+            <div class="news-date">Jan 2025</div>
+            <div>
+              One <a href="https://arxiv.org/abs/2411.18425" target="_blank">paper</a> accepted at ICLR 2025.
+            </div>
+          </li>
+          <li class="news-item">
+            <div class="news-date">Oct 2024</div>
+            <div>
+              Three workshop papers accepted at NeurIPS 2024.
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Selected Publications -->
+      <section id="publications" class="section">
+        <h2>Selected Publications</h2>
+
+        <p style="margin-top: 0.8rem; font-size: 1.rem;">
+          See full list of publications
+          <a href="https://scholar.google.com/citations?user=2HW6eeUAAAAJ" target="_blank">here</a>.
+        </p>
+
+        <ul class="pub-list">
+          <!-- ICLR 2025 -->
+          <li class="pub-item">
+            <div class="pub-thumb">
+              <img src="assets/img/pubs/suq.png" alt="ICLR 2025 thumbnail">
+            </div>
+            <div>
+              <div class="pub-meta-title">
+                Streamlining Prediction in Bayesian Deep Learning
+              </div>
+              <div class="pub-authors">
+                <strong>Rui Li</strong>, Marcus Klasson, Arno Solin, Martin Trapp
+              </div>
+              <div class="pub-venue">
+                International Conference on Learning Representations (ICLR), 2025.
+              </div>
+              <div class="pub-links">
+                <a href="https://arxiv.org/abs/2411.18425">paper</a> / <a href="https://github.com/AaltoML/SUQ">code</a>
+              </div>
+              <p>
+                While estimating posterior has been actively researched in Bayesian deep 
+                learning (BDL), how to make predictions with posterior efficiently is 
+                largely overlooked. We examine streamlining prediction in BDL through a 
+                single forward pass without sampling. We showcase our approach for both 
+                MLP and transformer models, such as ViT and GPT-2.
+              </p>
+            </div>
+          </li>
+
+          <!-- Post-hoc VLM -->
+          <li class="pub-item">
+            <div class="pub-thumb">
+              <img src="assets/img/pubs/bayesvlm.png" alt="Post-hoc Vision-Language thumbnail">
+            </div>
+            <div>
+              <div class="pub-meta-title">
+                Post-hoc Probabilistic Vision–Language Models
+              </div>
+              <div class="pub-authors">
+                Anton Baumann, <strong>Rui Li</strong>, Marcus Klasson, Santeri Mentu,
+                Shyamgopal Karthik, Zeynep Akata, Arno Solin, Martin Trapp
+              </div>
+              <div class="pub-venue">
+                Under Review.
+              </div>
+              <div class="pub-links">
+                <a href="https://arxiv.org/abs/2412.06014">paper</a> / <a href="https://github.com/AaltoML/BayesVLM">code</a>
+              </div>
+              <p>
+                While Vision–Language models have shown remarkable performance in various 
+                tasks, the lack of uncertainty estimation makes them unreliable in 
+                high-stakes applications. We propose a post-hoc uncertainty 
+                quantification method based on Laplace approximation, which provides 
+                useful predictive uncertainties and better calibration.
+              </p>
+            </div>
+          </li>
+
+          <!-- ICML 2023 -->
+          <li class="pub-item">
+            <div class="pub-thumb">
+              <img src="assets/img/pubs/gp.png" alt="ICML 2023 thumbnail">
+            </div>
+            <div>
+              <div class="pub-meta-title">
+                Improving Hyperparameter Learning under Approximate Inference in 
+                Gaussian Process Models
+              </div>
+              <div class="pub-authors">
+                <strong>Rui Li</strong>, Ti John, Arno Solin
+              </div>
+              <div class="pub-venue">
+                International Conference on Machine Learning (ICML), 2023.
+              </div>
+              <div class="pub-links">
+                <a href="https://arxiv.org/abs/2306.04201">paper</a> / <a href="https://github.com/AaltoML/improved-hyperparameter-learning">code</a>
+              </div>
+              <p>
+                Variational inference and expectation propagation are two commonly used 
+                approximate inferences in Gaussian process models with complementary 
+                advantages. We developed a hybrid training procedure to bring the best 
+                of both worlds.
+              </p>
+            </div>
+          </li>
+
+          <!-- WACV 2025 -->
+          <li class="pub-item">
+            <div class="pub-thumb">
+              <img src="assets/img/pubs/flatfsc.png" alt="WACV 2025 thumbnail">
+            </div>
+            <div>
+              <div class="pub-meta-title">
+                Flatness Improves Backbone Generalisation in Few-shot Classification
+              </div>
+              <div class="pub-authors">
+                <strong>Rui Li</strong>, Martin Trapp, Marcus Klasson, Arno Solin
+              </div>
+              <div class="pub-venue">
+                Winter Conference on Applications of Computer Vision (WACV), 2025. Oral.
+              </div>
+              <div class="pub-links">
+                <a href="https://arxiv.org/abs/2404.07696">paper</a> / <a href="https://github.com/AaltoML/FlatFSL">code</a>
+              </div>
+              <p>
+                In few-shot classification most efforts focus on adapting the backbone 
+                to the target domain without considering the importance of backbone 
+                training. We show that flatness-aware backbone optimisation can lead to 
+                better generalisation through theoretical and empirical results.
+              </p>
+            </div>
+          </li>
+        </ul>
+
+        
+      </section>
+
+      <!-- Blog preview -->
+      <section class="section">
+        <h2>Notes / Blog</h2>
+        <p style="margin-top: 0.8rem; font-size: 1.0 rem;">
+          See technical notes and blogs
+          <a href="blog/index.html">here</a>.
+        </p>
+      </section>
+
+      <div class="footer">
+        © 2025 Rui Li
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{title}} – Rui Li</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" href="../../assets/img/favicon.png" type="image/png">
+  
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Highlight.js (for code blocks) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.hljs) {
+        window.hljs.highlightAll();
+      }
+    });
+  </script>
+
+  <!-- MathJax (for LaTeX equations) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-title">Rui Li</div>
+
+      <div class="site-nav">
+        <div class="site-nav-links">
+          <a href="../../index.html#about">About</a>
+          <a href="../index.html" style="margin-left:1.2rem;">Notes / Blog</a>
+        </div>
+        <div class="header-icons">
+          <a class="icon-button"
+             href="mailto:rui.li@aalto.fi"
+             aria-label="Email">
+            <i class="fa-solid fa-envelope"></i>
+          </a>
+          <a class="icon-button"
+             href="https://scholar.google.com/citations?user=2HW6eeUAAAAJ"
+             target="_blank"
+             aria-label="Google Scholar">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </a>
+          <a class="icon-button"
+             href="https://github.com/ruili-pml"
+             target="_blank"
+             aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a class="icon-button"
+             href="https://www.linkedin.com/in/ruili-pml/"
+             target="_blank"
+             aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-wrapper blog-main">
+    <div class="main">
+      <section class="section">
+        <h1 class="blog-post-title">{{title}}</h1>
+        <div class="blog-post-meta">{{date}}</div>
+
+        <div class="post-content">
+          {{content}}
+        </div>
+      </section>
+
+      <div class="footer">
+        © 2025 Rui Li
+      </div>
+    </div>
+  </main>
+</body>
+</html>
