@@ -80,19 +80,86 @@
 
   <main class="page-wrapper blog-main">
     <div class="main">
-      <section class="section">
-        <h1 class="blog-post-title">{{title}}</h1>
-        <div class="blog-post-meta">{{date}}</div>
+      <div class="blog-layout">
+        <!-- main content -->
+        <section class="section blog-content">
+          <h1 class="blog-post-title">{{title}}</h1>
 
-        <div class="post-content">
-          {{content}}
-        </div>
-      </section>
-
+          <div class="blog-post-meta">
+            {{date}}
+            {{tags}}
+          </div>
+          
+          
+  
+          <div class="post-content" id="post-content">
+            {{content}}
+          </div>
+        </section>
+  
+        <!-- floating TOC on the right -->
+        <aside class="blog-toc" aria-label="Table of contents">
+          <div class="blog-toc-inner">
+            <div class="blog-toc-title">Table of Contents</div>
+            <nav id="toc"></nav>
+          </div>
+        </aside>
+      </div>
+  
       <div class="footer">
         © 2025 Rui Li
       </div>
     </div>
   </main>
-</body>
-</html>
+  
+  <!-- Auto-generate TOC from headings -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const content = document.getElementById("post-content");
+      const tocContainer = document.getElementById("toc");
+      if (!content || !tocContainer) return;
+  
+      const headings = content.querySelectorAll("h1, h2, h3");
+      if (!headings.length) return;
+  
+      const list = document.createElement("ul");
+      list.className = "toc-list";
+  
+      const slugCounts = {};
+  
+      function slugify(text) {
+        let slug = text.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-");
+        if (!slug) slug = "section";
+        if (slugCounts[slug] != null) {
+          slugCounts[slug] += 1;
+          slug = slug + "-" + slugCounts[slug];
+        } else {
+          slugCounts[slug] = 0;
+        }
+        return slug;
+      }
+  
+      headings.forEach(h => {
+        if (!h.id) {
+          h.id = slugify(h.textContent || h.innerText || "");
+        }
+        const li = document.createElement("li");
+        li.className = "toc-level-" + h.tagName[1]; // 1,2,3
+  
+        const a = document.createElement("a");
+        a.href = "#" + h.id;
+        a.textContent = h.textContent || h.innerText || "";
+  
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+  
+      tocContainer.appendChild(list);
+    });
+  </script>
+  </body>
+  </html>
+  

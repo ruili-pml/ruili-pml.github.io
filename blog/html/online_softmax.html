@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Online Softmax: the math behind FlashAttention and PagedAttention – Rui Li</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" href="../../assets/img/favicon.png" type="image/png">
+  
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Highlight.js (for code blocks) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.hljs) {
+        window.hljs.highlightAll();
+      }
+    });
+  </script>
+
+  <!-- MathJax (for LaTeX equations) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-title">Rui Li</div>
+
+      <div class="site-nav">
+        <div class="site-nav-links">
+          <a href="../../index.html#about">About</a>
+          <a href="../index.html" style="margin-left:1.2rem;">Notes / Blog</a>
+        </div>
+        <div class="header-icons">
+          <a class="icon-button"
+             href="mailto:rui.li@aalto.fi"
+             aria-label="Email">
+            <i class="fa-solid fa-envelope"></i>
+          </a>
+          <a class="icon-button"
+             href="https://scholar.google.com/citations?user=2HW6eeUAAAAJ"
+             target="_blank"
+             aria-label="Google Scholar">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </a>
+          <a class="icon-button"
+             href="https://github.com/ruili-pml"
+             target="_blank"
+             aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a class="icon-button"
+             href="https://www.linkedin.com/in/ruili-pml/"
+             target="_blank"
+             aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-wrapper blog-main">
+    <div class="main">
+      <div class="blog-layout">
+        <!-- main content -->
+        <section class="section blog-content">
+          <h1 class="blog-post-title">Online Softmax: the math behind FlashAttention and PagedAttention</h1>
+
+          <div class="blog-post-meta">
+            2025-11-30
+            <span class="blog-post-tags"><span class="tag">Online Softmax</span><span class="tag">FlashAttention</span><span class="tag">PagedAttention</span></span>
+          </div>
+          
+          
+  
+          <div class="post-content" id="post-content">
+            <h1 id="memory-bottleneck-in-self-attention">Memory Bottleneck in Self-attention</h1>
+<p>Denote the query, key, and value matrices as  </p>
+<div class="arithmatex">\[ 
+\mathbf{Q} \in \mathbb{R}^{T \times d}, \quad \mathbf{K} \in \mathbb{R}^{T \times d}, \quad \mathbf{V} \in \mathbb{R}^{T \times d}
+\]</div>
+<p>where <span class="arithmatex">\(T\)</span> is the number of tokens in the sequence and <span class="arithmatex">\(d\)</span> is the attention-head dimension.</p>
+<p>In self-attention, the attention weights are
+$$
+\mathbf{A}
+= \mathrm{Softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d}}\right)
+\in \mathbb{R}^{T \times T}.
+$$
+and single-head attention output is
+$$
+\mathbf{O} = \mathbf{A}\mathbf{V} \in \mathbb{R}^{T \times d}
+$$</p>
+<p>The most straightforward way to implement this is first construct <span class="arithmatex">\(\mathbf{A}\)</span>, then do the matrix multiplication. 
+For big models, this is problematic on two levels:</p>
+<p>The "Too Big" Problem (FlashAttention)</p>
+<p>The size of <span class="arithmatex">\(\mathbf{A}\)</span> grows quadratically. For a sequence length of <span class="arithmatex">\(T = 32,000\)</span> using FP16 precision, storing <span class="arithmatex">\(\mathbf{A}\)</span> requires <span class="arithmatex">\(\approx 2 \text{GB}\)</span> <em>per head</em>. Even if we had the capacity, the speed is bottlenecked by the time it takes to read and write this massive matrix to HBM (High Bandwidth Memory).</p>
+<p>The "Fragmented" Problem (PagedAttention)</p>
+<p>To construct <span class="arithmatex">\(\mathbf{A}\)</span> via a standard matrix multiplication, we generally need the full <span class="arithmatex">\(\mathbf{K}\)</span> matrix stored in a contiguous block of memory. During inference time with KV cache this can easily cause fragmentation.</p>
+<p>Both scenarios force us to abandon the idea of computing the full Softmax at once. We need an approach that processes the input in chunks, computes local results, and then combining them to get the global exact answer.</p>
+<p>This is where Online Softmax comes in.</p>
+<h1 id="closer-look-at-softmax">Closer Look at Softmax</h1>
+<p>Given an input vector <span class="arithmatex">\(\mathbf{x} = [x_1, x_2, \ldots, x_d] \in \mathbb{R}^{d \times 1}\)</span>, the standard Softmax is</p>
+<div class="arithmatex">\[
+\text{Softmax}(\mathbf{x}) =
+\left[
+\frac{\exp(x_1)}{\sum_{j=1}^d \exp(x_j)},
+\frac{\exp(x_2)}{\sum_{j=1}^d \exp(x_j)},
+\ldots,
+\frac{\exp(x_d)}{\sum_{j=1}^d \exp(x_j)}
+\right].
+\]</div>
+<p>Since we exponentiate every element, large positive values in <span class="arithmatex">\(\mathbf{x}\)</span> can easily cause numerical overflow (resulting in <code>NaN</code>). Therefore, practical implementations use the numerically stable version by subtracting the maximum value from inputs:
+$$
+\mathrm{Softmax}(\mathbf{x}) = \left[\frac{\exp(x_1 - m)}{\sum_j \exp(x_j - m)}, \frac{\exp(x_2 - m)}{\sum_j \exp(x_j - m)}, \ldots, \frac{\exp(x_d - m)}{\sum_j \exp(x_j - m)} \right]
+$$
+where
+$$
+m = \max(x_1, \ldots, x_d).
+$$</p>
+<p>To compute this, the standard approach </p>
+<ol>
+<li>
+<p>Find <span class="arithmatex">\(m\)</span>.</p>
+</li>
+<li>
+<p>Compute <span class="arithmatex">\(\exp(\mathbf{x}-m)\)</span> and the denominator <span class="arithmatex">\(\ell\)</span>.</p>
+</li>
+<li>
+<p>Divide to get the result.</p>
+</li>
+</ol>
+<pre><code class="language-python"># Standard approach requires materializing the full vector
+m = np.max(x)
+e_x = np.exp(x - m) 
+softmax = e_x / e_x.sum()
+</code></pre>
+<p>This requires materializing the entire vector <code>e_x</code> in memory. For huge sequence lengths, this is exactly what we want to avoid, that's where online Softmax comes in.</p>
+<h1 id="online-softmax">Online Softmax</h1>
+<p>Online Softmax allows us to compute these values one element (or one chunk) at a time, updating statistics as we go.</p>
+<p>In Softmax, we have two values that depends on the whole data:</p>
+<ul>
+<li>max <span class="arithmatex">\(m = \max(x_1, \ldots, x_d)\)</span></li>
+<li>denominator <span class="arithmatex">\(\ell = \sum_{j=1}^d \exp(x_j - m)\)</span></li>
+</ul>
+<p>So in Online Softmax, we keep a running max <span class="arithmatex">\(m_k\)</span> and running denominator <span class="arithmatex">\(\ell_k\)</span>, and update them as we traverse the data.</p>
+<h2 id="single-element-update">Single-element Update</h2>
+<p>Let's start by doing update one element at a time.</p>
+<h3 id="update-for-the-running-max">Update for the running max</h3>
+<p>What we have access to:</p>
+<ul>
+<li>Old Global State: <span class="arithmatex">\(m_{k-1}, \ell_{k-1}\)</span></li>
+<li>New Data: <span class="arithmatex">\(x_k\)</span></li>
+</ul>
+<p>The new max is simply the larger of the current value <span class="arithmatex">\(x_k\)</span> and the previous max <span class="arithmatex">\(m_{k-1}\)</span>:</p>
+<div class="arithmatex">\[m_k = \max(x_k,\, m_{k-1}).\]</div>
+<h3 id="update-for-the-running-denominator">Update for the running denominator</h3>
+<p>We need to express the new sum <span class="arithmatex">\(\ell_k\)</span> using the old sum <span class="arithmatex">\(\ell_{k-1}\)</span> without re-summing the previous elements.</p>
+<p>What we have access to:</p>
+<ul>
+<li>Old Global State: <span class="arithmatex">\(m_{k-1}, \ell_{k-1}\)</span></li>
+<li>New Global State: <span class="arithmatex">\(m_k\)</span></li>
+<li>New Data: <span class="arithmatex">\(x_k\)</span></li>
+</ul>
+<div class="arithmatex">\[
+\begin{aligned}
+\ell_k
+&amp;= \sum_{j=1}^{k} \exp(x_j - m_k) \\
+&amp;= \exp(x_k - m_k)
+ + \sum_{j=1}^{k-1} \exp(x_j - m_k) \\
+&amp;= \exp(x_k - m_k)
+ + \sum_{j=1}^{k-1} \exp(x_j - m_{k-1})\,\exp(m_{k-1} - m_k) \\
+&amp;= \exp(x_k - m_k)
+ + \exp(m_{k-1} - m_k)\,\ell_{k-1}.
+\end{aligned}
+\]</div>
+<h2 id="chunk-update">Chunk Update</h2>
+<p>In practice, we process data in chunks (blocks) to utilize GPU parallelism. Suppose we receive a chunk of data <span class="arithmatex">\(x_{k}, \ldots, x_{k+r}\)</span>.</p>
+<p>At time step <span class="arithmatex">\(k\)</span>, what stored in memory is our previous statistics <span class="arithmatex">\((m_{k-1}, \ell_{k-1})\)</span> and a new input chunk <span class="arithmatex">\(x_{k}, \ldots, x_{k+r}\)</span>.</p>
+<h3 id="update-for-running-max">Update for running max</h3>
+<p>We will first find the local max of the new chunk, let's call it <span class="arithmatex">\(\widetilde{m}\)</span>.
+Then update the global max.</p>
+<p>What we have access to:</p>
+<ul>
+<li>Old Global State: <span class="arithmatex">\(m_{k-1}, \ell_{k-1}\)</span></li>
+<li>New Data: <span class="arithmatex">\(x_{k}, \ldots, x_{k+r}\)</span></li>
+</ul>
+<div class="arithmatex">\[
+\widetilde{m}_{k+r} = \max(x_k,\ldots,x_{k+r}) \\
+m_{k+r} = \max\!\big(m_{k-1},\, \widetilde{m}_{k+r}\big).
+\]</div>
+<h3 id="update-for-the-running-denominator_1">Update for the running denominator</h3>
+<p>The idea is similar to single-element update.
+We express <span class="arithmatex">\(\ell_{k+r}\)</span> in a form of values we currently have access to.</p>
+<p>What we have access to:</p>
+<ul>
+<li>Old Global State: <span class="arithmatex">\(m_{k-1}, \ell_{k-1}\)</span></li>
+<li>New Local State: <span class="arithmatex">\(\widetilde{m}_{k+r}\)</span></li>
+<li>New Global State: <span class="arithmatex">\(m_{k+r}\)</span></li>
+<li>New Data: <span class="arithmatex">\(x_{k}, \ldots, x_{k+r}\)</span></li>
+</ul>
+<div class="arithmatex">\[
+\begin{aligned}
+\ell_{k+r}
+&amp;= \sum_{j=1}^{k+r} \exp(x_j - m_{k+r}) \\
+&amp;= \sum_{j=1}^{k-1} \exp(x_j - m_{k+r}) 
+   \;+\; \sum_{i=k}^{k+r} \exp(x_i - m_{k+r}) \\
+&amp;= \sum_{j=1}^{k-1} \exp\!\big(x_j - m_{k+r} + m_{k-1}-m_{k-1}\big)
+   \;+\; \sum_{i=k}^{k+r} \exp(x_i - m_{k+r}) \\
+&amp;= \exp(m_{k-1}-m_{k+r}) \sum_{j=1}^{k-1} \exp(x_j - m_{k-1})
+   \;+\; \sum_{i=k}^{k+r} \exp(x_i - m_{k+r}) \\
+&amp;= \exp(m_{k-1}-m_{k+r})\,\ell_{k-1}
+   \;+\; \sum_{i=k}^{k+r} \exp(x_i - m_{k+r}) \\
+&amp;= \exp(m_{k-1}-m_{k+r})\,\ell_{k-1}
+ + \exp(\widetilde{m}_{k+r} - m_{k+r})
+   \sum_{i=k}^{k+r} \exp(x_i - \widetilde{m}_{k+r})
+\end{aligned}
+\]</div>
+<h1 id="online-attention-output">Online Attention Output</h1>
+<p>In the end we care about the weighted sum of values, let's look at how to compute this in an online manner.</p>
+<h2 id="single-element-update_1">Single-element Update</h2>
+<p>What we have access to:</p>
+<ul>
+<li>Old Global State: <span class="arithmatex">\(m_{k-1}\)</span>, <span class="arithmatex">\(\ell_{k-1}\)</span>, <span class="arithmatex">\(\mathbf{o}_{k-1}\)</span></li>
+<li>New Global State: <span class="arithmatex">\(m_k\)</span>, <span class="arithmatex">\(\ell_k\)</span></li>
+<li>New Data: <span class="arithmatex">\(x_k\)</span>, <span class="arithmatex">\(\mathbf{v}_k\)</span></li>
+</ul>
+<div class="arithmatex">\[
+\begin{aligned}
+\mathbf{o}_{k}
+&amp;= \sum_{j=1}^{k} 
+   \frac{\exp(x_j - m_{k})}{\ell_{k}}\,\mathbf{v}_j
+\\[4pt]
+&amp;= \frac{\exp(x_1 - m_{k})}{\ell_{k}}\,\mathbf{v}_1
+ + \frac{\exp(x_2 - m_{k})}{\ell_{k}}\,\mathbf{v}_2
+ + \cdots
+ + \frac{\exp(x_{k} - m_{k})}{\ell_{k}}\,\mathbf{v}_{k}
+\quad \text{(same for every sum term)} 
+\\[6pt]
+&amp;= \frac{\exp(-m_{k})}{\ell_{k}}
+   \sum_{j=1}^{k} \exp(x_j)\,\mathbf{v}_j
+\\[6pt]
+&amp;= \frac{\exp(-m_{k})}{\ell_{k}}
+   \left(
+     \sum_{j=1}^{k-1} \exp(x_j)\,\mathbf{v}_j
+     \;+ \exp(x_k)\,\mathbf{v}_k
+   \right)
+\\[6pt]
+&amp;= \frac{\exp(-m_{k})}{\ell_{k}}
+   \left(
+     \sum_{j=1}^{k-1} 
+       \frac{\exp(x_j)\exp(-m_{k-1})}{\ell_{k-1}}
+       \cdot \frac{\ell_{k-1}}{\exp(-m_{k-1})}\,\mathbf{v}_j
+     \;+\; \exp(x_k)\,\mathbf{v}_k
+   \right)
+\\[6pt]
+&amp;=  \frac{\exp(-m_{k})}{\ell_{k}}  \exp(x_k)\,\mathbf{v}_k
+  + \frac{\exp(-m_{k})\,\ell_{k-1}}{\ell_{k}\,\exp(-m_{k-1})}\,
+    \underbrace{\sum_{j=1}^{k-1} 
+      \frac{\exp(x_j - m_{k-1})}{\ell_{k-1}}\,\mathbf{v}_j}_{\mathbf{o}_{k-1}}
+\\
+&amp;= \frac{\exp(x_k - m_k)}{\ell_k}\mathbf{v}_k
+ + \frac{\exp(-m_k)\,\ell_{k-1}}{\ell_k\,\exp(-m_{k-1})}\,\mathbf{o}_{k-1}
+\end{aligned}
+\]</div>
+<h2 id="chunk-update_1">Chunk Update</h2>
+<p>What we have access to:</p>
+<ul>
+<li>Old Global State: <span class="arithmatex">\(m_{k-1}, \ell_{k-1}\)</span></li>
+<li>New Local State: <span class="arithmatex">\(\widetilde{m}_{k+r}\)</span></li>
+<li>New Global State: <span class="arithmatex">\(m_{k+r}\)</span>, <span class="arithmatex">\(\ell_{k+r}\)</span></li>
+<li>New Data: <span class="arithmatex">\(\mathbf{x}_{k}, \ldots, \mathbf{x}_{k+r}\)</span>, <span class="arithmatex">\(\mathbf{v}_{k}, \ldots, \mathbf{v}_{k+r}\)</span></li>
+</ul>
+<div class="arithmatex">\[
+\begin{aligned}
+\mathbf{o}_{k+r}
+&amp;= \sum_{j=1}^{k+r} 
+   \frac{\exp(x_j - m_{k+r})}{\ell_{k+r}}\,\mathbf{v}_j
+\\[4pt]
+&amp;= \frac{\exp(x_1 - m_{k+r})}{\ell_{k+r}}\,\mathbf{v}_1
+ + \frac{\exp(x_2 - m_{k+r})}{\ell_{k+r}}\,\mathbf{v}_2
+ + \cdots
+ + \frac{\exp(x_{k+r} - m_{k+r})}{\ell_{k+r}}\,\mathbf{v}_{k+r}
+\\[6pt]
+&amp;= \frac{\exp(-m_{k+r})}{\ell_{k+r}}
+   \sum_{j=1}^{k+r} \exp(x_j)\,\mathbf{v}_j
+\\[6pt]
+&amp;= \frac{\exp(-m_{k+r})}{\ell_{k+r}}
+   \left(
+     \sum_{j=1}^{k-1} \exp(x_j)\,\mathbf{v}_j
+     \;+\; \sum_{i=k}^{k+r} \exp(x_i)\,\mathbf{v}_i
+   \right)
+\\[6pt]
+&amp;= \frac{\exp(-m_{k+r})}{\ell_{k+r}}
+   \left(
+     \sum_{j=1}^{k-1} 
+       \frac{\exp(x_j)\exp(-m_{k-1})}{\ell_{k-1}}
+       \cdot \frac{\ell_{k-1}}{\exp(-m_{k-1})}\,\mathbf{v}_j
+     \;+\; \sum_{i=k}^{k+r} \exp(x_i)\,\mathbf{v}_i
+   \right)
+\\[6pt]
+&amp;= \frac{\exp(-m_{k+r})\,\ell_{k-1}}{\ell_{k+r}\,\exp(-m_{k-1})}\,
+    \mathbf{o}_{k-1}
+   \;+\; \sum_{i=k}^{k+r} \frac{\exp(x_i - m_{k+r})}{\ell_{k+r}}\,\mathbf{v}_i 
+\\[6pt]
+&amp;= \frac{\exp(-m_{k+r})\,\ell_{k-1}}{\ell_{k+r}\,\exp(-m_{k-1})}\, \mathbf{o}_{k-1}
+ + \exp(\widetilde{m}_{k+r} - m_{k+r})
+   \sum_{i=k}^{k+r} \frac{\exp(x_i - \widetilde{m}_{k+r})}{\ell_{k+r}}\,\mathbf{v}_i
+\end{aligned}
+\]</div>
+<h1 id="summary">Summary</h1>
+<p>In short, Online Softmax gives us a way to compute attention output <strong>exactly</strong> without ever constructing the full <span class="arithmatex">\(T \times T\)</span> attention weight matrix. 
+Combined with a few additional scheduling and memory-management tricks, this is the core idea that makes FlashAttention and PagedAttention capable of handling long sequences efficiently.</p>
+<p>Denote the <span class="arithmatex">\(i\)</span>-th attention score as <span class="arithmatex">\(x_i\)</span>. The update rules are </p>
+<p>Old running results:<br />
+<span class="arithmatex">\(m_{k-1},\ \ell_{k-1},\ \mathbf{o}_{k-1}\)</span></p>
+<p>New data:<br />
+<span class="arithmatex">\(x_k,\ldots,x_{k+r},\ \mathbf{v}_k,\ldots,\mathbf{v}_{k+r}\)</span></p>
+<p>Update rules:</p>
+<div class="arithmatex">\[
+\widetilde{m}_{k+r} = \max(x_k,\ldots,x_{k+r})
+\]</div>
+<div class="arithmatex">\[
+m_{k+r} = \max(m_{k-1},\, \widetilde{m}_{k+r})
+\]</div>
+<div class="arithmatex">\[
+\ell_{k+r}
+= \exp(m_{k-1}-m_{k+r})\,\ell_{k-1}
+ + \exp(\widetilde{m}_{k+r} - m_{k+r})
+   \sum_{i=k}^{k+r} \exp(x_i - \widetilde{m}_{k+r})
+\]</div>
+<div class="arithmatex">\[
+\mathbf{o}_{k+r}
+= \frac{\exp(-m_{k+r})\,\ell_{k-1}}{\ell_{k+r}\,\exp(-m_{k-1})}\mathbf{o}_{k-1}
+ + \exp(\widetilde{m}_{k+r} - m_{k+r})
+   \sum_{i=k}^{k+r} \frac{\exp(x_i - \widetilde{m}_{k+r})}{\ell_{k+r}}\,\mathbf{v}_i
+\]</div>
+<p>This matches the expression in FlashAttention paper</p>
+<div class="arithmatex">\[
+\widetilde{m}_{k+r} = \max(x_k,\ldots,x_{k+r})
+\]</div>
+<div class="arithmatex">\[
+\widetilde{\ell}_{k+r} = \sum_{i=k}^{k+r} \exp(x_i - \widetilde{m}_{k+r})
+\]</div>
+<div class="arithmatex">\[
+m_{k+r} = \max(m_{k-1},\, \widetilde{m}_{k+r})
+\]</div>
+<div class="arithmatex">\[
+\ell_{k+r}
+= \exp(m_{k-1}-m_{k+r})\,\ell_{k-1}
+ + \exp(\widetilde{m}_{k+r} - m_{k+r})\,\widetilde{\ell}_{k+r}
+\]</div>
+<div class="arithmatex">\[
+\mathbf{o}_{k+r}
+= \frac{1}{\ell_{k+r}}
+\left(
+\ell_{k-1}\exp(m_{k-1}-m_{k+r})\,\mathbf{o}_{k-1}
++ \exp(\widetilde{m}_{k+r}-m_{k+r})
+  \sum_{i=k}^{k+r} \exp(x_i - \widetilde{m}_{k+r})\,\mathbf{v}_i
+\right)
+\]</div>
+<h1 id="reference">Reference</h1>
+<p>This blog post helped me a lot on understanding how online update works: 
+https://alvinwan.com/how-flash-attention-works/</p>
+<p>FlashAttention paper:
+https://arxiv.org/abs/2205.14135</p>
+          </div>
+        </section>
+  
+        <!-- floating TOC on the right -->
+        <aside class="blog-toc" aria-label="Table of contents">
+          <div class="blog-toc-inner">
+            <div class="blog-toc-title">Table of Contents</div>
+            <nav id="toc"></nav>
+          </div>
+        </aside>
+      </div>
+  
+      <div class="footer">
+        © 2025 Rui Li
+      </div>
+    </div>
+  </main>
+  
+  <!-- Auto-generate TOC from headings -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const content = document.getElementById("post-content");
+      const tocContainer = document.getElementById("toc");
+      if (!content || !tocContainer) return;
+  
+      const headings = content.querySelectorAll("h1, h2, h3");
+      if (!headings.length) return;
+  
+      const list = document.createElement("ul");
+      list.className = "toc-list";
+  
+      const slugCounts = {};
+  
+      function slugify(text) {
+        let slug = text.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-");
+        if (!slug) slug = "section";
+        if (slugCounts[slug] != null) {
+          slugCounts[slug] += 1;
+          slug = slug + "-" + slugCounts[slug];
+        } else {
+          slugCounts[slug] = 0;
+        }
+        return slug;
+      }
+  
+      headings.forEach(h => {
+        if (!h.id) {
+          h.id = slugify(h.textContent || h.innerText || "");
+        }
+        const li = document.createElement("li");
+        li.className = "toc-level-" + h.tagName[1]; // 1,2,3
+  
+        const a = document.createElement("a");
+        a.href = "#" + h.id;
+        a.textContent = h.textContent || h.innerText || "";
+  
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+  
+      tocContainer.appendChild(list);
+    });
+  </script>
+  </body>
+  </html>
+  

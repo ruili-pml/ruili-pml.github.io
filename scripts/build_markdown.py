@@ -30,28 +30,38 @@ def render_post(md_path: pathlib.Path):
     meta, body = parse_front_matter(raw)
 
     html_body = markdown.markdown(
-    body,
-    extensions=[
-        "fenced_code",
-        "tables",
-        "toc",
-        "pymdownx.arithmatex",
-    ],
-    extension_configs={
-        "pymdownx.arithmatex": {
-            "generic": True,
+        body,
+        extensions=[
+            "fenced_code",
+            "tables",
+            "toc",
+            "pymdownx.arithmatex",
+        ],
+        extension_configs={
+            "pymdownx.arithmatex": {
+                "generic": True,
+            }
         }
-    }
-)
-
+    )
 
     title = meta.get("title", md_path.stem)
     date = meta.get("date", "")
+    tags = meta.get("tags", []) or []
+
+    # build the HTML for tags (small pill badges)
+    if tags:
+        tag_pills = "".join(
+            f'<span class="tag">{t}</span>' for t in tags
+        )
+        tags_html = f'<span class="blog-post-tags">{tag_pills}</span>'
+    else:
+        tags_html = ""
 
     html = (
         template
         .replace("{{title}}", title)
         .replace("{{date}}", date)
+        .replace("{{tags}}", tags_html)
         .replace("{{content}}", html_body)
     )
 

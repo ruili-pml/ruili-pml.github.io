@@ -326,6 +326,100 @@ a:hover {
   margin: 0.6rem 0 0.6rem 1.3rem;
 }
 
+
+/* ===== Blog layout with floating TOC ===== */
+
+.blog-main .blog-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(220px, 260px);
+  gap: 1.8rem;
+  align-items: flex-start;
+}
+
+/* Make the actual article column visually narrow */
+.blog-main .blog-content {
+  max-width: 800px;         /* narrow-ish reading width */
+}
+
+/* Fine-tune text in posts */
+.blog-main .post-content {
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+/* TOC sidebar */
+/* ===== Clean minimal TOC styling ===== */
+
+.blog-toc {
+  position: sticky;
+  top: 5.5rem;
+  align-self: start;
+  font-size: 0.85rem;          /* small font */
+  line-height: 1.55;           /* more airy like screenshot */
+  color: #444;                 /* neutral text */
+}
+
+.blog-toc-inner {
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+}
+
+/* TOC title — small, subtle */
+.blog-toc-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.4rem;
+  color: #767373;
+  text-transform: none;        /* remove ALL CAPS */
+}
+
+/* Remove borders, bullets, decoration */
+.blog-toc .toc-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  border-left: none;           /* remove vertical line */
+}
+
+.blog-toc .toc-list li {
+  margin: 0.15rem 0;           /* compact vertical spacing */
+}
+
+/* Remove link styling completely */
+.blog-toc .toc-list a {
+  color: #8e8b8b;
+  text-decoration: none;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.blog-toc .toc-list a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Indent based on heading level — subtle */
+.blog-toc .toc-level-1 { padding-left: 0.2rem; }
+.blog-toc .toc-level-2 { padding-left: 1.0rem; }
+.blog-toc .toc-level-3 { padding-left: 1.8rem; }
+
+
+/* Mobile: stack TOC under the content */
+@media (max-width: 960px) {
+  .blog-main .blog-layout {
+    display: block;
+  }
+
+  .blog-toc {
+    position: static;
+    margin-top: 1.5rem;
+  }
+
+  .blog-toc .toc-list {
+    border-left: none;
+  }
+}
+
 /* === Clean light code blocks === */
 pre {
   background: #f6f8fa;
@@ -359,6 +453,28 @@ code {
   color: #999;
   margin-top: 0.5rem;
 }
+
+/* Blog post metadata (date + tags) */
+.blog-post-meta {
+  font-size: 0.9rem;
+  color: #6b7280;        /* grey-500 */
+  margin-bottom: 0.8rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* individual tag pill */
+.blog-post-tags .tag {
+  background: #f3f4f6;   /* light gray */
+  color: #374151;        /* dark grey */
+  padding: 2px 8px;
+  border-radius: 999px;  /* pill shape */
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 
 /* ===== About hero (photo on the side) ===== */
 .about-hero h2 {
