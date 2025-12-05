@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Central Limit Theorem in the wild: Gaussian distributions in LLMs – Rui Li</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="icon" href="../../assets/img/favicon.png" type="image/png">
+  
+  <link rel="stylesheet" href="../../assets/css/style.css" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Highlight.js (for code blocks) -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.hljs) {
+        window.hljs.highlightAll();
+      }
+    });
+  </script>
+
+  <!-- MathJax (for LaTeX equations) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    };
+  </script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-title">Rui Li</div>
+
+      <div class="site-nav">
+        <div class="site-nav-links">
+          <a href="../../index.html#about">About</a>
+          <a href="../index.html" style="margin-left:1.2rem;">Notes / Blog</a>
+        </div>
+        <div class="header-icons">
+          <a class="icon-button"
+             href="mailto:rui.li@aalto.fi"
+             aria-label="Email">
+            <i class="fa-solid fa-envelope"></i>
+          </a>
+          <a class="icon-button"
+             href="https://scholar.google.com/citations?user=2HW6eeUAAAAJ"
+             target="_blank"
+             aria-label="Google Scholar">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </a>
+          <a class="icon-button"
+             href="https://github.com/ruili-pml"
+             target="_blank"
+             aria-label="GitHub">
+            <i class="fa-brands fa-github"></i>
+          </a>
+          <a class="icon-button"
+             href="https://www.linkedin.com/in/ruili-pml/"
+             target="_blank"
+             aria-label="LinkedIn">
+            <i class="fa-brands fa-linkedin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-wrapper blog-main">
+    <div class="main">
+      <div class="blog-layout">
+        <!-- main content -->
+        <section class="section blog-content">
+          <h1 class="blog-post-title">Central Limit Theorem in the wild: Gaussian distributions in LLMs</h1>
+
+          <div class="blog-post-meta">
+            2025-12-03
+            <span class="blog-post-tags"><span class="tag">Attempt to understand LLM a bit more</span></span>
+          </div>
+          
+          
+  
+          <div class="post-content" id="post-content">
+            <h1 id="laplace-and-gaussian-distribution-in-llms">Laplace and Gaussian distribution in LLMs</h1>
+<p>I fell down a bit of a rabbit hole while reading a paper on KV cache compression. In passing, the authors mentioned that <strong>"<a href="https://arxiv.org/abs/2408.14690">this paper</a> shows hidden states in modern LLMs loosely follow a Gaussian distribution <span class="arithmatex">\(\boldsymbol{h} \sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})\)</span>."</strong>  (Spoiler: I think they’re drawing the wrong conclusion from what the paper actually says.)</p>
+<p>I was half-intrigued, half-suspicious. So I checked the paper, and they have this plot:</p>
+<p align="center">
+  <img src="imgs/pic_from_tale.png" alt="Figure from Tale paper showing Gaussian fits" width="100%">
+  <br>
+  <em>Illustration from the TEAL paper showing input distributions.</em>
+</p>
+
+<p>At first glance, this felt like magic. I wasn't entirely sure what was being plotted or if it would hold up in a different setup. So, I decided to verify it myself using Llama 3, which is the model used in the paper.</p>
+<p>Surprisingly, I got very similar plots. The Gaussian-like and Laplace-like shapes are definitely there.</p>
+<p align="center">
+  <img src="imgs/dist_layer0-3.png" alt="Llama 3 Activation Distributions (Layers 0-3)" width="100%">
+  <br>
+  <em>Activation distributions in the early layers (0-3).</em>
+</p>
+
+<p align="center">
+  <img src="imgs/dist_layer0-30.png" alt="Llama 3 Activation Distributions (Layers 0-30)" width="100%">
+  <br>
+  <em>Activation distributions spanning from Layer 0 to Layer 30.</em>
+</p>
+
+<p>To make things clearer, here’s the pseudo-code for the computation path inside one LLM layer.</p>
+<pre><code class="language-python"># Pseudo-code for the variable definitions
+attn_input = norm(attn_residual)
+sha_out    = SHA(attn_input)       # Sequence Head Attention output
+mha_out    = sha_out @ W_o
+mlp_residual = mha_out + attn_residual
+
+mlp_input  = norm(mlp_residual)
+mlp_gate   = gate(mlp_input @ W_gate) * (mlp_input @ W_up)
+mlp_out    = mlp_gate @ W_down
+layer_output = mlp_out + mlp_residual
+</code></pre>
+<p>And here is the mapping:
+* <strong>Paper:</strong> MLP <span class="arithmatex">\(W_{up, gate}\)</span> <span class="arithmatex">\(\rightarrow\)</span> <strong>My Plot:</strong> <code>mlp_input</code>
+* <strong>Paper:</strong> MLP <span class="arithmatex">\(W_{down}\)</span> <span class="arithmatex">\(\rightarrow\)</span> <strong>My Plot:</strong> <code>mlp_gate</code>
+* <strong>Paper:</strong> Attn <span class="arithmatex">\(W_{Q, K, V}\)</span> <span class="arithmatex">\(\rightarrow\)</span> <strong>My Plot:</strong> <code>attn_input</code> 
+* <strong>Paper:</strong> Attn <span class="arithmatex">\(W_O\)</span> <span class="arithmatex">\(\rightarrow\)</span> <strong>My Plot:</strong> <code>sha_out</code> </p>
+<p>And this is how I plot things: 
+I flattened each [B, T, d] tensor and clipped it to the 99.8% quantile (otherwise, extreme outliers make the plot look like a single thin line). 
+This removes the long tails just for the visualization, allowing us to actually see the distribution shape. 
+So the code for plotting is</p>
+<pre><code class="language-python">def plot_hist_ax(ax, input_tensor, title_name):
+    # Flatten to get all values across batch, time, and dimension
+    x = input_tensor.flatten().float().detach().cpu().numpy()
+
+    # Clip to 0.2% - 99.8% range to filter extreme outliers for better visualization
+    low, high = np.quantile(x, [0.002, 0.998])
+    x_clipped = x[(x &gt;= low) &amp; (x &lt;= high)]
+
+    ax.set_title(title_name)
+    _, _, _ = ax.hist(x_clipped, density=True, bins=200)
+</code></pre>
+<p>So basically, if we plot the distribution of each single feature, the pattern is quite consistent:
+1.  <strong>Laplace-like (Spiky):</strong>
+    This happens after the <strong>Single Head Attention (SHA)</strong> and the <strong>MLP gating</strong> parts. The distributions are extremely peaked around zero with heavy tails. </p>
+<ol>
+<li><strong>Gaussian-like (Bell Curve):</strong>
+    This happens after the <strong>Multi-Head Attention (MHA)</strong> aggregation and the <strong>MLP Down projection</strong>. </li>
+</ol>
+<h1 id="why-is-this-the-case">Why is this the case?</h1>
+<blockquote>
+<p>Disclaimer: No idea if my understanding actually makes sense, so take it with a grain of salt.</p>
+</blockquote>
+<p>Since we are looking at the distribution of features, let's really look at things on a single feature dimension.</p>
+<h2 id="single-head-attention">Single-head attention</h2>
+<p>For token <span class="arithmatex">\(t\)</span>, denote it as 
+$$
+\boldsymbol{x}<em>t = [x</em>{t,1}, x_{t, 2}, \ldots, x_{t, d}] \in \mathbb{R}^{1 \times d}
+$$ </p>
+<p>Its value at head <span class="arithmatex">\(h\)</span> is then 
+$$
+\boldsymbol{v}^h_t = \boldsymbol{x}<em>t \boldsymbol{W}_V^h=[v^h</em>{t,1}, v^h_{t, 2}, \ldots, v^h_{t, d_h}] \in \mathbb{R}^{1 \times d_h}
+$$ 
+where 
+$$
+v^h_{t,i} = \text{linear combination of } (x_{t,1}, x_{t, 2}, \ldots, x_{t, d})
+$$</p>
+<p>So basically each feature dimension of value <span class="arithmatex">\(v^h_{t,i}\)</span> is formed by a weighted sum of <span class="arithmatex">\(d\)</span> variables. Roughly speaking, we can use the <strong>Central Limit Theorem</strong> here. 
+Since we are mixing a massive number of input dimensions (4096 in Llama 3 8B), the resulting distribution of <span class="arithmatex">\(v^h_{t,i}\)</span> tends to converge towards a Gaussian.</p>
+<p>This is showing in the shift from <code>Attn input</code> to <code>Value</code> in the plot below. </p>
+<p>The output of token <span class="arithmatex">\(t\)</span> is 
+$$
+\boldsymbol{o}^h_t=\begin{bmatrix}
+o^h_{t, 1} &amp; o^h_{t, 2} &amp; \ldots &amp; o^h_{t, d_h}
+\end{bmatrix} = 
+\begin{bmatrix}
+A^h_{t, 1} &amp; A^h_{t, 2} &amp; \ldots &amp; A^h_{t, t}
+\end{bmatrix} 
+\begin{bmatrix}
+v^h_{1,1} &amp;  v^h_{1, 2} &amp; \ldots &amp; v^h_{1, d_h} \[1em]
+v^h_{2,1} &amp;  v^h_{2, 2} &amp; \ldots &amp; v^h_{2, d_h} \[1em]
+\vdots &amp; \vdots &amp; \vdots &amp; \vdots \[1em]
+v^h_{t,1} &amp;  v^h_{t, 2} &amp; \ldots &amp; v^h_{t, d_h} \[1em]
+\end{bmatrix}
+$$
+where
+$$
+o^h_{t, i} = \text{linear combination of } (v^h_{1,i}, v^h_{2,i}, \ldots, v^h_{t,i})
+$$</p>
+<p>So we are doing weighted sum again, the difference is attention weights <span class="arithmatex">\(\boldsymbol{A}\)</span> is much more sparse than the value projection matrix <span class="arithmatex">\(\boldsymbol{W}_V\)</span>.
+Instead of mix features, this is more like a feature selection step:
+1.  The Spike (at 0): For most tokens, the attention weight is near zero, or the feature isn't active, leading to the massive spike in the middle.
+2.  The Tails: When it <em>does</em> activate, it grabs a specific, strong signal, creating the heavy tails.</p>
+<p align="center">
+  <img src="imgs/value_vesus_sha.png" alt="Comparison of Value vectors vs SHA output" width="50%">
+  <br>
+  <em>Figure: Comparison of Value vectors (left) vs SHA output (right).</em>
+</p>
+
+<h2 id="multi-head-attention-fusion">Multi-head attention fusion</h2>
+<p>The output for token <span class="arithmatex">\(t\)</span> is
+$$
+\boldsymbol{o}<em>t
+=
+\sum</em>{h=1}^{H}
+\begin{bmatrix}
+o^{(h)}<em>{t,1} &amp;
+o^{(h)}</em>{t,2} &amp;
+\ldots &amp;
+o^{(h)}<em>{t,d_h}
+\end{bmatrix}
+\begin{bmatrix}
+W^{(h)}</em>{1,1} &amp; W^{(h)}<em>{1,2} &amp; \ldots &amp; W^{(h)}</em>{1,d} \[0.4em]
+W^{(h)}<em>{2,1} &amp; W^{(h)}</em>{2,2} &amp; \ldots &amp; W^{(h)}<em>{2,d} \[0.4em]
+\vdots          &amp; \vdots          &amp; \ddots &amp; \vdots           \[0.4em]
+W^{(h)}</em>{d_h,1} &amp; W^{(h)}<em>{d_h,2} &amp; \ldots &amp; W^{(h)}</em>{d_h,d}
+\end{bmatrix}.
+$$</p>
+<p>So we have
+$$
+o_{t, i} = \text{sum of} \Big(\text{linear combination of } (o_{t, 1}^{(h)}, o_{t, 2}^{(h)}, \ldots, o_{t, d_h}^{(h)})  \Big)
+$$</p>
+<p>Each output dimension is different linear combination of the same <span class="arithmatex">\((o_{t, 1}^{(h)}, o_{t, 2}^{(h)}, \ldots, o_{t, d_h}^{(h)})\)</span> across different head. </p>
+<p>The output projection matrix is dense again, so we end up with Gaussian shape.</p>
+<p align="center">
+  <img src="imgs/single_block.png" alt="Computation path within a layer" width="100%">
+  <br>
+  <em>Computation path within a layer.</em>
+</p>
+          </div>
+        </section>
+  
+        <!-- floating TOC on the right -->
+        <aside class="blog-toc" aria-label="Table of contents">
+          <div class="blog-toc-inner">
+            <div class="blog-toc-title">Table of Contents</div>
+            <nav id="toc"></nav>
+          </div>
+        </aside>
+      </div>
+  
+      <div class="footer">
+        © 2025 Rui Li
+      </div>
+    </div>
+  </main>
+  
+  <!-- Auto-generate TOC from headings -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const content = document.getElementById("post-content");
+      const tocContainer = document.getElementById("toc");
+      if (!content || !tocContainer) return;
+  
+      const headings = content.querySelectorAll("h1, h2, h3");
+      if (!headings.length) return;
+  
+      const list = document.createElement("ul");
+      list.className = "toc-list";
+  
+      const slugCounts = {};
+  
+      function slugify(text) {
+        let slug = text.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-");
+        if (!slug) slug = "section";
+        if (slugCounts[slug] != null) {
+          slugCounts[slug] += 1;
+          slug = slug + "-" + slugCounts[slug];
+        } else {
+          slugCounts[slug] = 0;
+        }
+        return slug;
+      }
+  
+      headings.forEach(h => {
+        if (!h.id) {
+          h.id = slugify(h.textContent || h.innerText || "");
+        }
+        const li = document.createElement("li");
+        li.className = "toc-level-" + h.tagName[1]; // 1,2,3
+  
+        const a = document.createElement("a");
+        a.href = "#" + h.id;
+        a.textContent = h.textContent || h.innerText || "";
+  
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+  
+      tocContainer.appendChild(list);
+    });
+  </script>
+  </body>
+  </html>
+  

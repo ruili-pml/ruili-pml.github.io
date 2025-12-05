@@ -112,14 +112,14 @@ For a deeper LLM, the logic is exactly the same, just applied layer by layer.</p
 <hr />
 <h1 id="two-stage-generation">Two stage generation</h1>
 <h2 id="step-1-processing-the-prompt-prefill">Step 1: Processing the Prompt (Prefill)</h2>
-<p>For simplicity, let's say the tokenised prompt has two tokens. So the input is
-$$
+<p>For simplicity, let's say the tokenised prompt has two tokens. So the input is</p>
+<div class="arithmatex">\[
 \boldsymbol{X} =
 \begin{bmatrix}
-\boldsymbol{x}_1 \[1em]
-\boldsymbol{x}_2 \
+\boldsymbol{x}_1 \\[1em]
+\boldsymbol{x}_2 \\
 \end{bmatrix}
-$$</p>
+\]</div>
 <p>Here, <span class="arithmatex">\(\boldsymbol{x}_t\)</span> is the embedding (or hidden state) of token <span class="arithmatex">\(t\)</span>.</p>
 <h3 id="rmsnorm">RMSNorm</h3>
 <p>The first step is normalization. 
@@ -141,40 +141,40 @@ In other words, nothing here will ever depend on the rest of the sequence.</p>
 <p>Next we enter the parallel computation of each single-head attention.
 This is where the interaction between tokens happens, and it’s also where KV cache will later save us the most work.</p>
 <h3 id="single-head-attention-of-head-h">Single head attention of head <span class="arithmatex">\(h\)</span></h3>
-<p>For each head <span class="arithmatex">\(h\)</span>, we first compute the query, key and value through linear projections.
-$$
+<p>For each head <span class="arithmatex">\(h\)</span>, we first compute the query, key and value through linear projections.</p>
+<div class="arithmatex">\[
 \boldsymbol{Q}^{(h)} =
 \begin{bmatrix}
-\widetilde{\boldsymbol{x}}<em>1 \boldsymbol{W}^{(h)}</em>{Q} \[0.8em]
-\widetilde{\boldsymbol{x}}<em>2 \boldsymbol{W}^{(h)}</em>{Q}
+\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}_{Q} \\[0.8em]
+\widetilde{\boldsymbol{x}}_2 \boldsymbol{W}^{(h)}_{Q}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\boldsymbol{q}^{(h)}<em>1 \[0.8em]
+\boldsymbol{q}^{(h)}_1 \\[0.8em]
 \boldsymbol{q}^{(h)}_2
 \end{bmatrix}
 ,\quad
 \boldsymbol{K}^{(h)} =
 \begin{bmatrix}
-\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}</em>{K} \[0.8em]
-\widetilde{\boldsymbol{x}}<em>2 \boldsymbol{W}^{(h)}</em>{K}
+\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}_{K} \\[0.8em]
+\widetilde{\boldsymbol{x}}_2 \boldsymbol{W}^{(h)}_{K}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\boldsymbol{k}^{(h)}<em>1 \[0.8em]
+\boldsymbol{k}^{(h)}_1 \\[0.8em]
 \boldsymbol{k}^{(h)}_2
 \end{bmatrix},\quad
 \boldsymbol{V}^{(h)} =
 \begin{bmatrix}
-\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}</em>{V} \[0.8em]
-\widetilde{\boldsymbol{x}}<em>2 \boldsymbol{W}^{(h)}</em>{V}
+\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}_{V} \\[0.8em]
+\widetilde{\boldsymbol{x}}_2 \boldsymbol{W}^{(h)}_{V}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\boldsymbol{v}^{(h)}_1 \[0.8em]
+\boldsymbol{v}^{(h)}_1 \\[0.8em]
 \boldsymbol{v}^{(h)}_2
 \end{bmatrix}.
-$$</p>
+\]</div>
 <p>Here, the dependence is still local:
 - <span class="arithmatex">\(\boldsymbol{q}^{(h)}_t\)</span> depends only on <span class="arithmatex">\(\widetilde{\boldsymbol{x}}_t\)</span> and <span class="arithmatex">\(\boldsymbol{W}^{(h)}_Q\)</span><br />
 - <span class="arithmatex">\(\boldsymbol{k}^{(h)}_t\)</span> depends only on <span class="arithmatex">\(\widetilde{\boldsymbol{x}}_t\)</span> and <span class="arithmatex">\(\boldsymbol{W}^{(h)}_K\)</span><br />
@@ -182,43 +182,43 @@ $$</p>
 <p>Nothing here mixes information across different tokens yet; we are still just reshaping each token independently into Q/K/V space.</p>
 <p>Next, we calculate the attention weights and single-head output.
 This is where the mixing begins: each query now “looks at” all previous keys and decides how much to mix from their values.</p>
-<p>The masked attention scores are
-$$
+<p>The masked attention scores are</p>
+<div class="arithmatex">\[
 \boldsymbol{S}^{(h)} =
 \begin{bmatrix}
-\boldsymbol{q}^{(h)}_1 \cdot \boldsymbol{k}^{(h)}_1 &amp; -\infty \[0.8em]
+\boldsymbol{q}^{(h)}_1 \cdot \boldsymbol{k}^{(h)}_1 &amp; -\infty \\[0.8em]
 \boldsymbol{q}^{(h)}_2 \cdot \boldsymbol{k}^{(h)}_1 &amp; \boldsymbol{q}^{(h)}_2 \cdot \boldsymbol{k}^{(h)}_2
 \end{bmatrix}.
-$$</p>
+\]</div>
 <p>With a <strong>causal mask</strong>, we ensure that each token cannot see future information. As we will see in a minute, <strong>this also ensures that the hidden states of past tokens will never change when new tokens arrives</strong>.</p>
-<p>By applying a row-wise softmax, we get the attention weights.
-$$
+<p>By applying a row-wise softmax, we get the attention weights.</p>
+<div class="arithmatex">\[
 \boldsymbol{A}^{(h)} =
 \begin{bmatrix}
-\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) } &amp;
-0 \[2.0em]
-\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) } &amp;
-\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }
+\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) } &amp;
+0 \\[2.0em]
+\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) } &amp;
+\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }
 \end{bmatrix}.
-$$</p>
-<p>Then, the output of each head is
-$$
+\]</div>
+<p>Then, the output of each head is</p>
+<div class="arithmatex">\[
 \begin{bmatrix}
-\boldsymbol{o}^{(h)}<em>1 \[0.8em]
+\boldsymbol{o}^{(h)}_1 \\[0.8em]
 \boldsymbol{o}^{(h)}_2
 \end{bmatrix}
 =
 \begin{bmatrix}
-A^{(h)}</em>{11} \boldsymbol{v}^{(h)}<em>1 \[0.8em]
-A^{(h)}</em>{21} \boldsymbol{v}^{(h)}<em>1 +
-A^{(h)}</em>{22} \boldsymbol{v}^{(h)}_2
+A^{(h)}_{11} \boldsymbol{v}^{(h)}_1 \\[0.8em]
+A^{(h)}_{21} \boldsymbol{v}^{(h)}_1 +
+A^{(h)}_{22} \boldsymbol{v}^{(h)}_2
 \end{bmatrix}.
-$$</p>
+\]</div>
 <h3 id="multi-head-attention-output">Multi head attention output</h3>
 <p>Multi-head attention simply concatenates the outputs of all heads and mixes them with a final output projection.<br />
 There is no information exchange between tokens here.</p>
@@ -276,15 +276,15 @@ There is no information exchange between tokens here.</p>
 Now we append <span class="arithmatex">\(\boldsymbol{x}_3\)</span> into the input and continue the generation. This is where the redundancy happens.</p>
 <p>Let’s first write out the naive computation, where we simply pretend this is a fresh 3-token input and redo everything from scratch.
 I have hightlighted in blue the exact computation that we already performed during the prefill phase.</p>
-<p>We feed in all three tokens:
-$$
+<p>We feed in all three tokens:</p>
+<div class="arithmatex">\[
 \boldsymbol{X} =
 \begin{bmatrix}
-\boldsymbol{x}_1 \[1em]
-\boldsymbol{x}_2 \[1em]
+\boldsymbol{x}_1 \\[1em]
+\boldsymbol{x}_2 \\[1em]
 \boldsymbol{x}_3
 \end{bmatrix}
-$$</p>
+\]</div>
 <h3 id="rmsnorm_1">RMSNorm</h3>
 <div class="arithmatex">\[
 \widetilde{\boldsymbol{X}} =
@@ -301,99 +301,99 @@ $$</p>
 \end{bmatrix}
 \]</div>
 <h3 id="single-head-attention-of-head-h_1">Single head attention of head <span class="arithmatex">\(h\)</span></h3>
-<p>Compute query, key and values
-$$
+<p>Compute query, key and values</p>
+<div class="arithmatex">\[
 \boldsymbol{Q}^{(h)} =
 \begin{bmatrix}
-\textcolor{blue}{\widetilde{\boldsymbol{x}}<em>1 \boldsymbol{W}^{(h)}</em>{Q}} \[1em]
-\textcolor{blue}{\widetilde{\boldsymbol{x}}<em>2\boldsymbol{W}^{(h)}</em>{Q}} \[1em]
-\widetilde{\boldsymbol{x}}<em>3\boldsymbol{W}^{(h)}</em>{Q}
+\textcolor{blue}{\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}_{Q}} \\[1em]
+\textcolor{blue}{\widetilde{\boldsymbol{x}}_2\boldsymbol{W}^{(h)}_{Q}} \\[1em]
+\widetilde{\boldsymbol{x}}_3\boldsymbol{W}^{(h)}_{Q}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\textcolor{blue}{\boldsymbol{q}^{(h)}<em>1} \[1em]
-\textcolor{blue}{\boldsymbol{q}^{(h)}_2} \[1em]
+\textcolor{blue}{\boldsymbol{q}^{(h)}_1} \\[1em]
+\textcolor{blue}{\boldsymbol{q}^{(h)}_2} \\[1em]
 \boldsymbol{q}^{(h)}_3
 \end{bmatrix}, \quad
 \boldsymbol{K}^{(h)} =
 \begin{bmatrix}
-\textcolor{blue}{\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}</em>{K}} \[1em]
-\textcolor{blue}{\widetilde{\boldsymbol{x}}<em>2\boldsymbol{W}^{(h)}</em>{K}} \[1em]
-\widetilde{\boldsymbol{x}}<em>3\boldsymbol{W}^{(h)}</em>{K}
+\textcolor{blue}{\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}_{K}} \\[1em]
+\textcolor{blue}{\widetilde{\boldsymbol{x}}_2\boldsymbol{W}^{(h)}_{K}} \\[1em]
+\widetilde{\boldsymbol{x}}_3\boldsymbol{W}^{(h)}_{K}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\textcolor{blue}{\boldsymbol{k}^{(h)}<em>1} \[1em]
-\textcolor{blue}{\boldsymbol{k}^{(h)}_2} \[1em]
+\textcolor{blue}{\boldsymbol{k}^{(h)}_1} \\[1em]
+\textcolor{blue}{\boldsymbol{k}^{(h)}_2} \\[1em]
 \boldsymbol{k}^{(h)}_3
 \end{bmatrix}
 , \quad
 \boldsymbol{V}^{(h)} =
 \begin{bmatrix}
-\textcolor{blue}{\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}</em>{V}} \[1em]
-\textcolor{blue}{\widetilde{\boldsymbol{x}}<em>2 \boldsymbol{W}^{(h)}</em>{V}} \[1em]
-\widetilde{\boldsymbol{x}}<em>3 \boldsymbol{W}^{(h)}</em>{V}
+\textcolor{blue}{\widetilde{\boldsymbol{x}}_1 \boldsymbol{W}^{(h)}_{V}} \\[1em]
+\textcolor{blue}{\widetilde{\boldsymbol{x}}_2 \boldsymbol{W}^{(h)}_{V}} \\[1em]
+\widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_{V}
 \end{bmatrix}
 =
 \begin{bmatrix}
-\textcolor{blue}{\boldsymbol{v}^{(h)}_1} \[1em]
-\textcolor{blue}{\boldsymbol{v}^{(h)}_2} \[1em]
+\textcolor{blue}{\boldsymbol{v}^{(h)}_1} \\[1em]
+\textcolor{blue}{\boldsymbol{v}^{(h)}_2} \\[1em]
 \boldsymbol{v}^{(h)}_3
 \end{bmatrix}
-$$</p>
-<p>Attention scores
-$$
+\]</div>
+<p>Attention scores</p>
+<div class="arithmatex">\[
 \boldsymbol{S}^{(h)} =
 \begin{bmatrix}
-\textcolor{blue}{\boldsymbol{q}^{(h)}_1 \cdot \boldsymbol{k}^{(h)}_1} &amp; -\infty &amp; -\infty \[1em]
-\textcolor{blue}{\boldsymbol{q}^{(h)}_2 \cdot \boldsymbol{k}^{(h)}_1} &amp; \textcolor{blue}{\boldsymbol{q}^{(h)}_2 \cdot \boldsymbol{k}^{(h)}_2} &amp; -\infty \[1em]
+\textcolor{blue}{\boldsymbol{q}^{(h)}_1 \cdot \boldsymbol{k}^{(h)}_1} &amp; -\infty &amp; -\infty \\[1em]
+\textcolor{blue}{\boldsymbol{q}^{(h)}_2 \cdot \boldsymbol{k}^{(h)}_1} &amp; \textcolor{blue}{\boldsymbol{q}^{(h)}_2 \cdot \boldsymbol{k}^{(h)}_2} &amp; -\infty \\[1em]
 \boldsymbol{q}^{(h)}_3 \cdot \boldsymbol{k}^{(h)}_1 &amp; \boldsymbol{q}^{(h)}_3 \cdot \boldsymbol{k}^{(h)}_2 &amp; \boldsymbol{q}^{(h)}_3 \cdot \boldsymbol{k}^{(h)}_3
 \end{bmatrix}
-$$</p>
-<p>Attention weights
-$$
+\]</div>
+<p>Attention weights</p>
+<div class="arithmatex">\[
 \boldsymbol{A}^{(h)} =
 \begin{bmatrix}
-\textcolor{blue}{\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) }} &amp;
-0 &amp; 0 \[2.5em]
-\textcolor{blue}{\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }} &amp;
-\textcolor{blue}{\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }} &amp;
-0 \[2.5em]
-\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) } &amp;
-\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) } &amp;
-\dfrac{ \exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) }
-      { \exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big)
-       +\exp!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) }
+\textcolor{blue}{\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_1\cdot \boldsymbol{k}^{(h)}_1\big) }} &amp;
+0 &amp; 0 \\[2.5em]
+\textcolor{blue}{\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }} &amp;
+\textcolor{blue}{\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_2\cdot \boldsymbol{k}^{(h)}_2\big) }} &amp;
+0 \\[2.5em]
+\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) } &amp;
+\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) } &amp;
+\dfrac{ \exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) }
+      { \exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_1\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_2\big)
+       +\exp\!\big(\boldsymbol{q}^{(h)}_3\cdot \boldsymbol{k}^{(h)}_3\big) }
 \end{bmatrix}
-$$</p>
-<p>Single head attention output
-$$
+\]</div>
+<p>Single head attention output</p>
+<div class="arithmatex">\[
 \begin{bmatrix}
-\textcolor{blue}{\boldsymbol{o}^{(h)}<em>1} \[1em]
-\textcolor{blue}{\boldsymbol{o}^{(h)}_2} \[1em]
+\textcolor{blue}{\boldsymbol{o}^{(h)}_1} \\[1em]
+\textcolor{blue}{\boldsymbol{o}^{(h)}_2} \\[1em]
 \boldsymbol{o}^{(h)}_3
 \end{bmatrix}=
 \begin{bmatrix}
-\textcolor{blue}{A^{(h)}</em>{11} \boldsymbol{v}^{(h)}<em>1} \[1em]
-\textcolor{blue}{A^{(h)}</em>{21} \boldsymbol{v}^{(h)}<em>1 +
-A^{(h)}</em>{22} \boldsymbol{v}^{(h)}<em>2} \[1em]
-A^{(h)}</em>{31} \boldsymbol{v}^{(h)}<em>1 +
-A^{(h)}</em>{32} \boldsymbol{v}^{(h)}<em>2 +
-A^{(h)}</em>{33} \boldsymbol{v}^{(h)}_3
+\textcolor{blue}{A^{(h)}_{11} \boldsymbol{v}^{(h)}_1} \\[1em]
+\textcolor{blue}{A^{(h)}_{21} \boldsymbol{v}^{(h)}_1 +
+A^{(h)}_{22} \boldsymbol{v}^{(h)}_2} \\[1em]
+A^{(h)}_{31} \boldsymbol{v}^{(h)}_1 +
+A^{(h)}_{32} \boldsymbol{v}^{(h)}_2 +
+A^{(h)}_{33} \boldsymbol{v}^{(h)}_3
 \end{bmatrix}
-$$</p>
+\]</div>
 <h3 id="multi-head-attention-output_1">Multi head attention output</h3>
 <div class="arithmatex">\[
 \begin{bmatrix}
@@ -459,52 +459,50 @@ One thing we haven't considered is this:</p>
 <p>Let’s look more closely at what we actually need to compute for the last token (token 3).
 This will make it clear which quantities have to be recomputed and which ones can safely be reused from a cache.</p>
 <p>Self-attention block:</p>
-<p>We have
-$$
-\boldsymbol{o}<em>3^{\text{Attn}} = \sum</em>{h=1}^H \boldsymbol{o}<em>3^{(h)}\boldsymbol{W}_O^{(h)}
-$$
-where the output of head <span class="arithmatex">\(h\)</span> is
-$$
-\boldsymbol{o}_3^{(h)} = A^{(h)}</em>{31} \boldsymbol{v}^{(h)}<em>1 +
-A^{(h)}</em>{32} \boldsymbol{v}^{(h)}<em>2 +
-A^{(h)}</em>{33} \boldsymbol{v}^{(h)}<em>3,
-$$
-$$
+<p>We have</p>
+<div class="arithmatex">\[
+\boldsymbol{o}_3^{\text{Attn}} = \sum_{h=1}^H \boldsymbol{o}_3^{(h)}\boldsymbol{W}_O^{(h)}
+\]</div>
+<p>where the output of head <span class="arithmatex">\(h\)</span> is</p>
+<div class="arithmatex">\[
+\boldsymbol{o}_3^{(h)} = A^{(h)}_{31} \boldsymbol{v}^{(h)}_1 +
+A^{(h)}_{32} \boldsymbol{v}^{(h)}_2 +
+A^{(h)}_{33} \boldsymbol{v}^{(h)}_3,
+\]</div>
+<div class="arithmatex">\[
 \begin{bmatrix}
-A^{(h)}</em>{31}, &amp; A^{(h)}<em>{32}, &amp; A^{(h)}</em>{33}
+A^{(h)}_{31}, &amp; A^{(h)}_{32}, &amp; A^{(h)}_{33}
 \end{bmatrix}
 =
 \text{Softmax}\left( \begin{bmatrix}
 \boldsymbol{q}^{(h)}_3 \cdot \boldsymbol{k}^{(h)}_1, &amp; \boldsymbol{q}^{(h)}_3 \cdot \boldsymbol{k}^{(h)}_2, &amp; \boldsymbol{q}^{(h)}_3 \cdot \boldsymbol{k}^{(h)}_3
 \end{bmatrix}\right)
-$$</p>
-<p>So basically we need
-$$
-\Big{\boldsymbol{q}^{(h)}<em>3, \;\boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3, \; \boldsymbol{k}^{(h)}_1,\boldsymbol{k}^{(h)}_2,\;
-        \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big}</em>{h=1}^H
-$$</p>
+\]</div>
+<p>So basically we need</p>
+<div class="arithmatex">\[
+\Big\{\boldsymbol{q}^{(h)}_3, \;\boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3, \; \boldsymbol{k}^{(h)}_1,\boldsymbol{k}^{(h)}_2,\;
+        \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big\}_{h=1}^H
+\]</div>
 <p>We can further split this into:</p>
 <ul>
-<li>
-<p><strong>What we need to compute</strong> (depends on <span class="arithmatex">\(\boldsymbol{x}_3\)</span>):
-  $$
-  \Big{\boldsymbol{q}^{(h)}<em>3,\; \boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3\Big}</em>{h=1}^H,
-  $$
-  where
-  $$
-  \boldsymbol{q}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_Q, \qquad
-  \boldsymbol{k}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_K, \qquad
-  \boldsymbol{v}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_V.
-  $$</p>
-</li>
-<li>
-<p><strong>What we can reuse</strong>:
-  $$
-  \Big{\boldsymbol{k}^{(h)}<em>1,\boldsymbol{k}^{(h)}_2,\;
-        \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big}</em>{h=1}^H.
-  $$</p>
-</li>
+<li><strong>What we need to compute</strong> (depends on <span class="arithmatex">\(\boldsymbol{x}_3\)</span>):</li>
 </ul>
+<div class="arithmatex">\[
+\Big\{\boldsymbol{q}^{(h)}_3,\; \boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3\Big\}_{h=1}^H,
+\]</div>
+<p>where</p>
+<div class="arithmatex">\[
+\boldsymbol{q}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_Q, \qquad
+\boldsymbol{k}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_K, \qquad
+\boldsymbol{v}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_V.
+\]</div>
+<ul>
+<li><strong>What we can reuse</strong>:</li>
+</ul>
+<div class="arithmatex">\[
+\Big\{\boldsymbol{k}^{(h)}_1,\boldsymbol{k}^{(h)}_2,\;
+    \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big\}_{h=1}^H.
+\]</div>
 <p>Then, the rest of the forward pass depends only on token 3.</p>
 <p>Residual:</p>
 <div class="arithmatex">\[

@@ -30,6 +30,7 @@ At inference time there are usually two stages:
 ## Step 1: Processing the Prompt (Prefill)
 
 For simplicity, let's say the tokenised prompt has two tokens. So the input is
+
 $$
 \boldsymbol{X} =
 \begin{bmatrix}
@@ -66,6 +67,7 @@ This is where the interaction between tokens happens, and it’s also where KV c
 
 ### Single head attention of head $h$
 For each head $h$, we first compute the query, key and value through linear projections.
+
 $$
 \boldsymbol{Q}^{(h)} =
 \begin{bmatrix}
@@ -111,6 +113,7 @@ Next, we calculate the attention weights and single-head output.
 This is where the mixing begins: each query now “looks at” all previous keys and decides how much to mix from their values.
  
 The masked attention scores are
+
 $$
 \boldsymbol{S}^{(h)} =
 \begin{bmatrix}
@@ -122,6 +125,7 @@ $$
 With a **causal mask**, we ensure that each token cannot see future information. As we will see in a minute, **this also ensures that the hidden states of past tokens will never change when new tokens arrives**.
 
 By applying a row-wise softmax, we get the attention weights.
+
 $$
 \boldsymbol{A}^{(h)} =
 \begin{bmatrix}
@@ -138,6 +142,7 @@ $$
 $$
 
 Then, the output of each head is
+
 $$
 \begin{bmatrix}
 \boldsymbol{o}^{(h)}_1 \\[0.8em]
@@ -226,6 +231,7 @@ Let’s first write out the naive computation, where we simply pretend this is a
 I have hightlighted in blue the exact computation that we already performed during the prefill phase.
 
 We feed in all three tokens:
+
 $$
 \boldsymbol{X} =
 \begin{bmatrix}
@@ -236,6 +242,7 @@ $$
 $$
 
 ### RMSNorm
+
 $$
 \widetilde{\boldsymbol{X}} =
 \begin{bmatrix}
@@ -253,6 +260,7 @@ $$
 
 ### Single head attention of head $h$
 Compute query, key and values
+
 $$
 \boldsymbol{Q}^{(h)} =
 \begin{bmatrix}
@@ -294,6 +302,7 @@ $$
 $$
 
 Attention scores
+
 $$
 \boldsymbol{S}^{(h)} =
 \begin{bmatrix}
@@ -304,6 +313,7 @@ $$
 $$
 
 Attention weights
+
 $$
 \boldsymbol{A}^{(h)} =
 \begin{bmatrix}
@@ -333,6 +343,7 @@ $$
 $$
 
 Single head attention output
+
 $$
 \begin{bmatrix}
 \textcolor{blue}{\boldsymbol{o}^{(h)}_1} \\[1em]
@@ -350,6 +361,7 @@ A^{(h)}_{33} \boldsymbol{v}^{(h)}_3
 $$
 
 ### Multi head attention output
+
 $$
 \begin{bmatrix}
 \textcolor{blue}{\boldsymbol{o}_1} \\[1em]
@@ -427,15 +439,19 @@ This will make it clear which quantities have to be recomputed and which ones ca
 Self-attention block:
 
 We have
+
 $$
 \boldsymbol{o}_3^{\text{Attn}} = \sum_{h=1}^H \boldsymbol{o}_3^{(h)}\boldsymbol{W}_O^{(h)}
 $$
+
 where the output of head $h$ is
+
 $$
 \boldsymbol{o}_3^{(h)} = A^{(h)}_{31} \boldsymbol{v}^{(h)}_1 +
 A^{(h)}_{32} \boldsymbol{v}^{(h)}_2 +
 A^{(h)}_{33} \boldsymbol{v}^{(h)}_3,
 $$
+
 $$
 \begin{bmatrix}
 A^{(h)}_{31}, & A^{(h)}_{32}, & A^{(h)}_{33}
@@ -447,6 +463,7 @@ A^{(h)}_{31}, & A^{(h)}_{32}, & A^{(h)}_{33}
 $$
 
 So basically we need
+
 $$
 \Big\{\boldsymbol{q}^{(h)}_3, \;\boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3, \; \boldsymbol{k}^{(h)}_1,\boldsymbol{k}^{(h)}_2,\;
         \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big\}_{h=1}^H
@@ -455,21 +472,25 @@ $$
 We can further split this into:
 
 - **What we need to compute** (depends on $\boldsymbol{x}_3$):
-  $$
-  \Big\{\boldsymbol{q}^{(h)}_3,\; \boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3\Big\}_{h=1}^H,
-  $$
-  where
-  $$
-  \boldsymbol{q}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_Q, \qquad
-  \boldsymbol{k}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_K, \qquad
-  \boldsymbol{v}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_V.
-  $$
+
+$$
+\Big\{\boldsymbol{q}^{(h)}_3,\; \boldsymbol{k}^{(h)}_3,\; \boldsymbol{v}^{(h)}_3\Big\}_{h=1}^H,
+$$
+
+where
+
+$$
+\boldsymbol{q}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_Q, \qquad
+\boldsymbol{k}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_K, \qquad
+\boldsymbol{v}^{(h)}_3 = \widetilde{\boldsymbol{x}}_3 \boldsymbol{W}^{(h)}_V.
+$$
 
 - **What we can reuse**:
-  $$
-  \Big\{\boldsymbol{k}^{(h)}_1,\boldsymbol{k}^{(h)}_2,\;
-        \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big\}_{h=1}^H.
-  $$
+
+$$
+\Big\{\boldsymbol{k}^{(h)}_1,\boldsymbol{k}^{(h)}_2,\;
+    \boldsymbol{v}^{(h)}_1,\boldsymbol{v}^{(h)}_2\Big\}_{h=1}^H.
+$$
 
 Then, the rest of the forward pass depends only on token 3.
 
